@@ -1,6 +1,7 @@
 #include "Motor.h"
 #include "Driver.h"
 #include "Sensor.h"
+#include "Schedule.h"
 
 //motor pins
 #define RMOTA 20
@@ -19,41 +20,42 @@
 #define GYROPIN 0
 
 
-unsigned long dt = 0;
-unsigned long pt = 0;
-
 Motor motorRight(RMOTA, RMOTB);
 Motor motorLeft(LMOTA, LMOTB);
-Sensor front(FSENSOR, IR, &dt);
-Sensor back(BSENSOR, IR, &dt);
-Sensor right(RSENSOR, IRD, &dt);
-Sensor left(LSENSOR, IR, &dt);
-Gyro gyro(GYROPIN);
+Sensor front(FSENSOR, IR);
+Sensor back(BSENSOR, IR);
+Sensor right(RSENSOR, IRD);
+Sensor left(LSENSOR, IR);
+GyroAccl gyro;
 
-Driver driver(&motorLeft, &motorRight, &front, &back, &right, &left, &gyro, &dt);
+Driver driver(&motorLeft, &motorRight, &front, &back, &right, &left, &gyro);
+Schedule schedule(&driver, &front, &back, &right, &left, &gyro);
 
 
 void setup() {
   Serial.begin(9600);
+  attachInterrupt(0, dmpDataReadyWrapper, RISING);
+  schedule.init();
   pinMode(13, OUTPUT); 
   digitalWrite(13, HIGH);   // turn the LED on (HIGH is the voltage level)
-  // put your setup code here, to run once:
-  pt = millis();
   driver.init();
   driver.setStraight();
 }
 
-int updateDelay = 10;
+int updateDelay = 1000;
 void loop() {
-  // put your main code here, to run repeatedly:
-  dt = millis() - pt;
-  pt = millis();
-  driver.update();
   // game logic here
   if(updateDelay <= 0) {
+    schedule.update();
     driver.move();
   }
   else {
+    schedule.adjust();
     updateDelay--;
   }
 }
+
+void dmpDataReadyWrapper() {
+  gyro.dmpDataReady();
+}
+

@@ -10,19 +10,21 @@
 #define MOVINGBACKWARD 20
 #define SLEEP 18
 
+#define SPEEDCAP 255
+#define IDEAL 150
+
 
 #include "Motor.h"
 #include "Sensor.h"
-#include "Gyro.h"
+#include "GyroAccl.h"
 #include "Arduino.h"
 
 class Driver {
 public:
-	Driver(Motor* left, Motor* right, Sensor* a, Sensor* b, Sensor* c, Sensor* dd, Gyro* g, unsigned long* d) {
+	Driver(Motor* left, Motor* right, Sensor* a, Sensor* b, Sensor* c, Sensor* dd, GyroAccl* g) {
 		leftMotor = left;
 		rightMotor = right;
 		gyro = g;
-		dt = d;
 		fronts = a;
 		backs = b;
 		rights = c;
@@ -36,6 +38,44 @@ public:
 	}
 
 	void calibrate() {
+		double ch = 0.0 - gyro->getChange();
+		double time = (double)dt;
+
+		errsum += ch;
+		double derr = (ch - error) / time;
+
+		double res = kp * ch + ki * errsum + kd * derr;
+
+		error = ch;
+
+		if(res < 0.0) {
+			if(cRightSpeed < IDEAL) {
+				cRightSpeed += (int) abs(res);
+			}
+			else {
+				cLeftSpeed -= (int) abs(res);
+			}
+		}
+		else {
+			if(cLeftSpeed < IDEAL) {
+				cLeftSpeed += (int) abs(res);
+			}
+			else {
+				cRightSpeed -= (int) abs(res);
+			}
+		}
+
+		if(cRightSpeed > IDEAL) {
+			cRightSpeed -= (IDEAL - cRightSpeed);
+			cLeftSpeed -= (IDEAL - cRightSpeed);
+		}
+		else if(cLeftSpeed > IDEAL) {
+			cRightSpeed -= (IDEAL - cLeftSpeed);
+			cLeftSpeed -= (IDEAL - cLeftSpeed);
+		}
+
+		Serial.println(res);
+		gyro->reset();
 
 	}
 
@@ -48,16 +88,18 @@ public:
 		if(fcall) {
 			fcall = false;
 		}
-		leftMotor->setDirection(ANTICLOCKWISE);
-		rightMotor->setDirection(ANTICLOCKWISE);
+		leftMotor->setDirection(CLOCKWISE);
+		rightMotor->setDirection(CLOCKWISE);
 		leftMotor->setSpeed(cRightSpeed);
 		rightMotor->setSpeed(cLeftSpeed);
 		leftMotor->move();
 		rightMotor->move();
-		if(fronts->distance() < 8) {
-			freeze();
-		}
+		
 		calibrate();
+
+		/*if(fronts->getDistance() < 8) {
+			freeze();
+		}*/
 	}
 
 	void turnRight() {
@@ -82,10 +124,9 @@ public:
 		status = SLEEP;
 	}
 
-	void update() {
-		fronts->update();
-		rights->update();
-		gyro->update();
+	void update(unsigned long d) {
+		dt = d;
+		if(dt == 0) dt = 1; 
 	}
 
 	void move() {
@@ -118,14 +159,16 @@ private:
 	char status = SLEEP;
 	bool fcall = true;
 	bool locked = false;
-	unsigned long* dt;
 	Sensor* fronts;
 	Sensor* backs;
 	Sensor* lefts;
 	Sensor* rights;
-	Gyro* gyro;
+	GyroAccl* gyro;
 	int cRightSpeed = 40;
 	int cLeftSpeed = 40;
+	unsigned long dt = 0;
+	double error = 0.0, errsum = 0.0;
+	double kp = 1.0, ki = 1.0, kd = 1.0;
 };
 
 #endif
