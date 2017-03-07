@@ -42,8 +42,9 @@ void setup() {
   driver.setStraight();
 }
 
-int updateDelay = 1000;
+int updateDelay = 20000;
 void loop() {
+  while(!Serial){};
   // game logic here
   if(updateDelay <= 0) {
     schedule.update();

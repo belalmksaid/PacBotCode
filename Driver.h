@@ -10,9 +10,6 @@
 #define MOVINGBACKWARD 20
 #define SLEEP 18
 
-#define SPEEDCAP 255
-#define IDEAL 150
-
 
 #include "Motor.h"
 #include "Sensor.h"
@@ -38,44 +35,27 @@ public:
 	}
 
 	void calibrate() {
-		double ch = 0.0 - gyro->getChange();
-		double time = (double)dt;
-
-		errsum += ch;
-		double derr = (ch - error) / time;
-
-		double res = kp * ch + ki * errsum + kd * derr;
-
-		error = ch;
-
-		if(res < 0.0) {
-			if(cRightSpeed < IDEAL) {
-				cRightSpeed += (int) abs(res);
+		double ch = gyro->getChange();
+		if(abs(ch) > 5) {
+			Serial.println(ch); 
+			if(ch > 0) {
+				if(cRightSpeed >= 100) {
+					cLeftSpeed--;
+				}
+				else {
+					cRightSpeed++;
+				}
 			}
-			else {
-				cLeftSpeed -= (int) abs(res);
+			else { 
+				if(cLeftSpeed >= 100) {
+					cRightSpeed--;
+				}
+				else {
+					cLeftSpeed++;
+				}
 			}
+			gyro->reset();
 		}
-		else {
-			if(cLeftSpeed < IDEAL) {
-				cLeftSpeed += (int) abs(res);
-			}
-			else {
-				cRightSpeed -= (int) abs(res);
-			}
-		}
-
-		if(cRightSpeed > IDEAL) {
-			cRightSpeed -= (IDEAL - cRightSpeed);
-			cLeftSpeed -= (IDEAL - cRightSpeed);
-		}
-		else if(cLeftSpeed > IDEAL) {
-			cRightSpeed -= (IDEAL - cLeftSpeed);
-			cLeftSpeed -= (IDEAL - cLeftSpeed);
-		}
-
-		Serial.println(res);
-		gyro->reset();
 
 	}
 
@@ -124,9 +104,8 @@ public:
 		status = SLEEP;
 	}
 
-	void update(unsigned long d) {
-		dt = d;
-		if(dt == 0) dt = 1; 
+	void update() {
+
 	}
 
 	void move() {
@@ -166,9 +145,6 @@ private:
 	GyroAccl* gyro;
 	int cRightSpeed = 40;
 	int cLeftSpeed = 40;
-	unsigned long dt = 0;
-	double error = 0.0, errsum = 0.0;
-	double kp = 1.0, ki = 1.0, kd = 1.0;
 };
 
 #endif

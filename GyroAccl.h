@@ -16,14 +16,16 @@ public:
 
 	}
 
-	void update(unsigned long timestamp) {
+	void update(unsigned long A, unsigned long B) {
+		timestampA = A;
+		timestampB = B;
 		if (!dmpReady) return;
  		while (fifoCount < packetSize) {
  			break;
   		}
   		mpuInterrupt = false;
  		mpuIntStatus = mpu.getIntStatus();
- 		fifoCount = mpu.getFIFOCount();
+ 		fifoCount -= packetSize;
  		if ((mpuIntStatus & 0x10) || fifoCount == 1024)
   		{
 	    	mpu.resetFIFO();
@@ -35,10 +37,11 @@ public:
    			mpu.getFIFOBytes(fifoBuffer, packetSize);
   			fifoCount -= packetSize;
  			mpu.dmpGetQuaternion(&q, fifoBuffer);
+ 			mpu.dmpGetEuler(euler, &q);
     		mpu.dmpGetGyro(gyro, fifoBuffer);
-    		mpu.dmpGetEuler(euler, &q);
+
     		dt = gyro[0];
-    		orientation = euler[0];
+    		orientation = euler[0] * 180/M_PI;
   		} 
 	}
 
@@ -61,10 +64,18 @@ public:
         	Serial.print(devStatus);
         	Serial.println(F(")"));
     	}
+    	Serial.println("Gyro ready!");
 	}
 
 	double getChange() {
-		return dt - dtdrift;
+		if(timestampB - timestampA < 10000)
+			return dt - dtdrift * (10000 - (timestampB - timestampA)) / 10000;
+		else
+			return dt;
+	}
+
+	double getOrientation() {
+		return orientation;
 	}
 
 	void reset() {
@@ -106,6 +117,7 @@ private:
 	byte buf_tmp=0;
 	uint8_t i2cData[14];
 
+	unsigned long timestampA, timestampB;
 
 
 

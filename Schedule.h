@@ -26,23 +26,23 @@ public:
 	}
 
 	void adjust() {
-		gyro->update(timestampB);
-		gyro->setDrift();
 		timestampB = millis();
-		//fronts->update(timestampA);
+		gyro->update(timestampB, timestampF);
+		gyro->setDrift();
+		fronts->update(timestampA);
 		//lefts->update(timestampA);
 	}
 
 	void update() {
 		timestampA = millis();
 		driver->update(timestampA - timestampB);
-		gyro->update(timestampA - timestampB);
+		gyro->update(timestampA, timestampF);
 		if(gyroTime == 0) {
 			
 			gyroTime = GYROTIME;
 		}
 		else {
-			//fronts->update(timestampA);
+			fronts->update(timestampA);
 			//lefts->update(timestampA);
 			gyroTime--;
 		}
