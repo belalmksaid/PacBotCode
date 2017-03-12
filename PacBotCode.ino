@@ -19,6 +19,10 @@
 //other pins
 #define GYROPIN 0
 
+//commands
+#define STOP 0
+#define START 1
+
 
 Motor motorRight(RMOTA, RMOTB);
 Motor motorLeft(LMOTA, LMOTB);
@@ -31,6 +35,7 @@ GyroAccl gyro;
 Driver driver(&motorLeft, &motorRight, &front, &back, &right, &left, &gyro);
 Schedule schedule(&driver, &front, &back, &right, &left, &gyro);
 
+volatile short command = START;
 
 void setup() {
   Serial.begin(9600);
@@ -40,20 +45,24 @@ void setup() {
   digitalWrite(13, HIGH);   // turn the LED on (HIGH is the voltage level)
   driver.init();
   driver.setStraight();
+  //driver.setAdjustState();
 }
 
-int updateDelay = 20000;
 void loop() {
-  while(!Serial){};
   // game logic here
-  if(updateDelay <= 0) {
-    schedule.update();
-    driver.move();
+  if(!gyro.isReady()) {
+    schedule.updateSensorsOnly();
   }
   else {
-    schedule.adjust();
-    updateDelay--;
+    getCommand();
+    if(command == START) {
+      schedule.update();
+    }
   }
+}
+
+void getCommand() {
+  
 }
 
 void dmpDataReadyWrapper() {

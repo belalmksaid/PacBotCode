@@ -6,6 +6,8 @@
 #include "I2Cdev.h"
 #include "MPU6050_6Axis_MotionApps20.h"
 
+#define CHAINSIZE 5
+
 #if I2CDEV_IMPLEMENTATION == I2CDEV_ARDUINO_WIRE
     #include "Wire.h"
 #endif
@@ -40,8 +42,33 @@ public:
  			mpu.dmpGetEuler(euler, &q);
     		mpu.dmpGetGyro(gyro, fifoBuffer);
 
-    		dt = gyro[0];
-    		orientation = euler[0] * 180/M_PI;
+    		if(!isGyroReady) {
+    			if(iteration > CHAINSIZE && dtChain[0] != dtChain[1] && abs(orientationChain[0] - orientationChain[CHAINSIZE - 1]) < 0.03) {
+    				isGyroReady = true;
+				}
+    		}
+    		/*if(isGyroReady) {
+    			Serial.println("DT");
+    			Serial.println(dtChain[CHAINSIZE - 1]);
+    			Serial.println("orientation");
+    			Serial.println(orientationChain[CHAINSIZE - 1]);
+    		}
+    		else {
+    			Serial.println("Not ready");
+    			Serial.println(dtChain[0]);
+    			Serial.println(dtChain[1]);
+
+    		}*/
+
+    		for(int i = 0; i < CHAINSIZE - 1; i++) {
+    			orientationChain[i] = orientationChain[i + 1];
+    			dtChain[i] = dtChain[i + 1];
+    		}
+
+    		orientationChain[CHAINSIZE - 1] = euler[0] * 180/M_PI;
+    		dtChain[CHAINSIZE - 1] = gyro[0];
+    		iteration++;
+    		updated = true;
   		} 
 	}
 
@@ -68,18 +95,27 @@ public:
 	}
 
 	double getChange() {
-		if(timestampB - timestampA < 10000)
-			return dt - dtdrift * (10000 - (timestampB - timestampA)) / 10000;
-		else
-			return dt;
+		return dtChain[CHAINSIZE - 1];
 	}
 
 	double getOrientation() {
-		return orientation;
+		return orientationChain[CHAINSIZE - 1];
 	}
 
 	void reset() {
-		dt = 0;
+		updated = false;
+	}
+
+	bool hasNewValue() {
+		return updated;
+	}
+
+	bool isReady() {
+		return isGyroReady;
+	}
+
+	void setDefault() {
+
 	}
 
 	void dmpDataReady()
@@ -87,15 +123,7 @@ public:
 	  mpuInterrupt = true;
 	}
 
-	void setDrift() {
-		dtdrift = (dt + dtdrift) / 2.0;
-	}
-
 private:
-
-	double dt = 0.0;
-	double dtdrift = 0.0;
-	double orientation = 0.0;
 
 	MPU6050 mpu;            // AD0 low = 0x68
 
@@ -119,8 +147,13 @@ private:
 
 	unsigned long timestampA, timestampB;
 
+	bool isGyroReady = false;
 
+	int16_t dtChain[CHAINSIZE] = {-20,-20,-20,-20,-20};
+	float orientationChain[CHAINSIZE] = {-20,-20,-20,-20,-20};
+	unsigned long iteration = 0;
 
+	bool updated = false;
 };
 
 #endif

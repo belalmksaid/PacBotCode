@@ -9,6 +9,7 @@
 #define MOVINGFORWARD 2
 #define MOVINGBACKWARD 20
 #define SLEEP 18
+#define ADJUSTMOTORS 22
 
 
 #include "Motor.h"
@@ -32,54 +33,68 @@ public:
 		fronts->init();
 		rights->init();
 		gyro->init();
+		cRightSpeed = 0;
+		cLeftSpeed = 0;
 	}
-
+	int calibWait = 20;
 	void calibrate() {
 		double ch = gyro->getChange();
-		if(abs(ch) > 5) {
-			Serial.println(ch); 
+		if(abs(ch) > 5 && calibWait < 0) {
+			//Serial.println("Orientation:");
+			//Serial.println(gyro->getOrientation());
+			//Serial.println("Change:");
+			//Serial.println(gyro->getChange());
+			
 			if(ch > 0) {
-				if(cRightSpeed >= 100) {
+				if(cLeftSpeed > 0)
 					cLeftSpeed--;
-				}
-				else {
-					cRightSpeed++;
-				}
 			}
 			else { 
-				if(cLeftSpeed >= 100) {
+				if(cRightSpeed > 0)
 					cRightSpeed--;
-				}
-				else {
-					cLeftSpeed++;
-				}
 			}
 			gyro->reset();
+			calibWait = 20;
 		}
+		else {
+			//Serial.println("Left:");
+			//Serial.println(cLeftSpeed);
+			//Serial.println("Right:");
+			//Serial.println(cRightSpeed);
+		}
+		calibWait--;
 
 	}
 
 	void setStraight() {
+		stop();
 		status = MOVINGFORWARD;
-		Serial.println(status == MOVINGFORWARD);
+
 	}
 
+	volatile int adjustPeriod = 20;
+
 	void moveForward() {
-		if(fcall) {
-			fcall = false;
+		if(cRightSpeed < TARGETSPEED && cLeftSpeed < TARGETSPEED && adjustPeriod < 0) {
+			cRightSpeed++;
+			cLeftSpeed++;
+			adjustPeriod = 20;
 		}
+		adjustPeriod--;
 		leftMotor->setDirection(CLOCKWISE);
 		rightMotor->setDirection(CLOCKWISE);
-		leftMotor->setSpeed(cRightSpeed);
-		rightMotor->setSpeed(cLeftSpeed);
+		leftMotor->setSpeed(cLeftSpeed);
+		rightMotor->setSpeed(cRightSpeed);
 		leftMotor->move();
 		rightMotor->move();
 		
 		calibrate();
 
-		/*if(fronts->getDistance() < 8) {
+		if(fronts->getDistance() < 8) {
 			freeze();
-		}*/
+			status = TURNINGRIGHT;
+		}
+
 	}
 
 	void turnRight() {
@@ -98,13 +113,19 @@ public:
 
 	}
 
+	void stop() {
+		leftMotor->stop();
+		rightMotor->stop();
+	}
+
 	void freeze() {
 		leftMotor->freeze();
 		rightMotor->freeze();
 		status = SLEEP;
 	}
 
-	void update() {
+	void update(unsigned long dt) {
+		move();
 
 	}
 
@@ -122,8 +143,14 @@ public:
 			case MOVINGFORWARD:
 			moveForward();
 			break;
+
+			case SLEEP:
+			if(fronts->getDistance() > 8) {
+				setAdjustState();
+			}
+			break;
 			default:
-			calibrate();
+			//
 			break;
 		}
 	}
@@ -143,8 +170,9 @@ private:
 	Sensor* lefts;
 	Sensor* rights;
 	GyroAccl* gyro;
-	int cRightSpeed = 40;
-	int cLeftSpeed = 40;
+	int cRightSpeed = 80;
+	int cLeftSpeed = 72;
+	int TARGETSPEED = 250;
 };
 
 #endif

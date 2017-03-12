@@ -25,28 +25,33 @@ public:
 		timestampF = millis();
 	}
 
-	void adjust() {
+	void takeTimeA() {
+		timestampA = millis();
+	}
+
+	void takeTimeB() {
 		timestampB = millis();
-		gyro->update(timestampB, timestampF);
-		gyro->setDrift();
+	}
+
+	void updateSensors() {
+		gyro->update(timestampA, timestampF);
 		fronts->update(timestampA);
 		//lefts->update(timestampA);
+
+	}
+
+	void updateSensorsOnly() {
+		takeTimeA();
+		updateSensors();
+		takeTimeB();
 	}
 
 	void update() {
-		timestampA = millis();
+		takeTimeA();
+		updateSensors();
 		driver->update(timestampA - timestampB);
-		gyro->update(timestampA, timestampF);
-		if(gyroTime == 0) {
-			
-			gyroTime = GYROTIME;
-		}
-		else {
-			fronts->update(timestampA);
-			//lefts->update(timestampA);
-			gyroTime--;
-		}
-		timestampB = millis();
+		takeTimeB();
+		
 	}
 
 private:
