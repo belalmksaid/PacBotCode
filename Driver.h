@@ -143,11 +143,7 @@ public:
 			case MOVINGFORWARD:
 			moveForward();
 			break;
-
 			case SLEEP:
-			if(fronts->getDistance() > 8) {
-				setAdjustState();
-			}
 			break;
 			default:
 			//

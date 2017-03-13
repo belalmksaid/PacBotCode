@@ -50,6 +50,7 @@ void setup() {
 
 void loop() {
   // game logic here
+  while(!Serial){}
   if(!gyro.isReady()) {
     schedule.updateSensorsOnly();
   }
