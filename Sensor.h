@@ -2,9 +2,13 @@
 #define SENSOR
 
 #define IR 0
+#define IRSHORT 3
 #define US 1
 #define IRD 2
 #define CHAINSIZE 5
+
+#define COVERED 0
+#define OPEN 1
 
 #include "Arduino.h"
 
@@ -16,15 +20,18 @@ public:
 	}
 
 	void init() {
-		pinMode(pin, OUTPUT);
+		pinMode(pin, INPUT);
 	}
 
 	void update(unsigned long ts) {
-		val = analogRead(pin);
 		if(type == IRD) {
-			val = val < 500 ? 0 : 1;
+			val = digitalRead(pin);
 		}
-		else {
+		else if(type == IRSHORT) {
+			distance = analogRead(pin);
+		}
+		else if(type == IR) {
+			val = analogRead(pin);
 			if(ts - timeStamp < 100)
 				return;
 			oldDistance = distance;
@@ -44,15 +51,19 @@ public:
 			distance += chain[4];
 			speedChain[CHAINSIZE - 1] = (chain[CHAINSIZE - 1] - chain[0]) / (timeAvg);
 			spd += speedChain[CHAINSIZE - 1] / 5.0;
-			Serial.print(distance);
-			Serial.print("\t");
-			Serial.println(spd);
+			//Serial.println(distance);
+			//Serial.print("\t");
+			//Serial.println(spd);
 		}
 		timeStamp = ts;		
 	}
 
 	double speed() {
 		return spd;
+	}
+
+	int getState() {
+		return val;
 	}
 
 	double getDistance() {
