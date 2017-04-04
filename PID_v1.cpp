@@ -29,7 +29,7 @@ PID::PID(double* Input, double* Output, double* Setpoint,
 	PID::SetOutputLimits(0, 255);				//default output limit corresponds to 
 												//the arduino pwm limits
 
-    SampleTime = 20;							//default Controller Sample Time is 0.02 seconds
+    SampleTime = 10;							//default Controller Sample Time is 0.02 seconds
 
     PID::SetControllerDirection(ControllerDirection);
     PID::SetTunings(Kp, Ki, Kd);
@@ -58,6 +58,8 @@ bool PID::Compute()
       /*Compute all the working error variables*/
 	  double input = *myInput;
       double error = *mySetpoint - input;
+      //Serial.println("WT");
+      //Serial.println(error);
       ITerm+= (ki * error);
       if(ITerm > outMax) ITerm= outMax;
       else if(ITerm < outMin) ITerm= outMin;

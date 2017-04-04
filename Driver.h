@@ -35,21 +35,22 @@ public:
 		backs = b;
 		rights = c;
 		lefts = dd;
-		pid = new PID(&leftMotor->speed, &leftPWM, &rightMotor->speed, 3, .5, 0.3, DIRECT);
-		pidspeed = new PID(&rightMotor->speed, &rightMasterPWM, &desiredSpeed, 3, .5, .3, DIRECT);
-		pidturn = new PID(&leftMotor->speed, &leftPWM, &antiTurningSpeed, 3, .5, .3, DIRECT);
+		pid = new PID(&leftMotor->speed, &leftPWM, &rightMotor->speed, 0.01, 30, 0.05, DIRECT);
+		pidspeed = new PID(&rightMotor->speed, &rightMasterPWM, &desiredSpeed, 2, 0.5, 0, DIRECT);
+		pidturnL = new PID(&dummyLeft, &leftPWM, &desiredSpeed, .01, 25, .05, DIRECT);
+		pidturnR =  new PID(&dummyRight, &rightMasterPWM, &desiredSpeed, .01, 25, .05, DIRECT);
 	}
 
 	void init() {
 		fronts->init();
 		lefts->init();
 		pid->SetMode(AUTOMATIC);
-		pid->SetControllerDirection(REVERSE);
 		pidspeed->SetMode(AUTOMATIC);
-		pidspeed->SetControllerDirection(REVERSE);
+		//pidspeed->SetControllerDirection(DIRECT);
 		pidspeed->SetOutputLimits(0, 230);
-		pidturn->SetMode(AUTOMATIC);
-		pidturn->SetControllerDirection(REVERSE);
+		pidturnR->SetMode(AUTOMATIC);
+		pidturnL->SetMode(AUTOMATIC);
+		//pidturn->SetControllerDirection(REVERSE);
 		//gyro->init();
 	}
 
@@ -65,8 +66,8 @@ public:
 		if(status == TURNINGRIGHT) return;
 		freeze();
 		status = TURNINGRIGHT;
-		desiredSpeed = -TURNINGSPEED;
-		antiTurningSpeed = -desiredSpeed;
+		//pidspeed->SetControllerDirection(REVERSE);
+		desiredSpeed = TURNINGSPEED;
 	}
 
 	void stop() {
@@ -84,10 +85,6 @@ public:
 		dt = d;
 		leftMotor->updateEncoder(d);
 		rightMotor->updateEncoder(d);
-		/*Serial.print(leftMotor->speed);
-		Serial.print("\t");
-		Serial.print(rightMotor->speed);
-		Serial.println();*/
 	}
 
 	void update() {
@@ -131,15 +128,15 @@ private:
 	Sensor* lefts;
 	Sensor* rights;
 	//GyroAccl* gyro;
-	double leftPWM = 80;
+	double leftPWM = 75;
 	double rightMasterPWM = 60;
 	double desiredSpeed = 12.0;
-	double antiTurningSpeed = -8.0;
+	double dummyRight = 0.0, dummyLeft = 0.0;
 	unsigned long dt = 0;
 	PID* pid; 
 	//PID* pidwall;
 	PID* pidspeed;
-	PID* pidturn;
+	PID* pidturnR, *pidturnL;
 
 	double var = 0.0;
 
@@ -151,8 +148,8 @@ private:
 			fcall = false;
 			startEncRight = rightMotor->encoderPos1;
 			startEncLeft = leftMotor->encoderPos1;
-			pidspeed->Reset();
-			pidturn->Reset();
+			pidturnR->Reset();
+			pidturnL->Reset();
 		}
 		else {
 			if(startEncLeft + STEPS90 <= leftMotor->encoderPos1) {
@@ -161,14 +158,17 @@ private:
 				setStraight();
 			}
 			else {
+				Serial.println(rightMasterPWM);
 				leftMotor->setDirection(ANTICLOCKWISE);
 				rightMotor->setDirection(ANTICLOCKWISE);
 				leftMotor->setValue((int)leftPWM);
 				rightMotor->setValue((int)rightMasterPWM);
 				leftMotor->move();
 				rightMotor->move();
-				pidspeed->Compute();
-				pidturn->Compute();
+				dummyLeft = abs(leftMotor->speed);
+				dummyRight = abs(rightMotor->speed);
+				pidturnL->Compute();
+				pidturnR->Compute();
 			}
 		}
 	}
@@ -193,11 +193,16 @@ private:
 		leftMotor->move();
 		rightMotor->move();
 		pid->Compute();
+		Serial.print(leftMotor->speed);
+		Serial.print("\t");
+		Serial.print(rightMotor->speed);
+		Serial.println();
 		pidspeed->Compute();
+		//Serial.println(leftPWM);
 		//calibrateF();
 
 		if(fronts->getDistance() < 8) {
-			//setRight();
+			setRight();
 		}
 
 	}

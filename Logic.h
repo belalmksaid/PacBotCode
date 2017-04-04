@@ -7,7 +7,7 @@
 class Logic {
 public:
 	Logic(Driver* d, Map* m) {
-		// /d->setStraight();
+		d->setRight();
 	}
 
 	void update() {

@@ -46,7 +46,10 @@ public:
 		//gyro->update(timestampA, timestampF);
 		fronts->update(timestampA);
 		lefts->update(timestampA);
-		Serial.println(lefts->getDistance());
+		rights->update(timestampA);
+		//Serial.print(lefts->getDistance());
+		//Serial.print("\t");
+		//Serial.println(rights->getDistance());
 		rightD->update(timestampA);
 		leftD->update(timestampA);
 		driver->updateEncodersOnly(microA);
@@ -63,10 +66,9 @@ public:
 	void update() {
 		takeTimeA();
 		updateSensors();
-		delay(50);
 		driver->update();
+		delay(10);
 		takeTimeB();
-		
 	}
 
 private:

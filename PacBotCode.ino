@@ -28,12 +28,12 @@
 #define START 1
 
 
-Motor motorRight(RMOTA, RMOTB, 0, 1);
-Motor motorLeft(LMOTA, LMOTB, 2, 3);
+Motor motorRight(RMOTA, RMOTB, 2, 3);
+Motor motorLeft(LMOTA, LMOTB, 0, 1);
 Sensor front(FSENSOR, IR);
 Sensor back(BSENSOR, IR);
-Sensor right(RSENSOR, IRSHORT);
-Sensor left(LSENSOR, IRSHORT);
+Sensor right(RSENSOR, IRSHORTR);
+Sensor left(LSENSOR, IRSHORTL);
 Sensor rightD(RDSENSOR, IRD);
 Sensor leftD(LDSENSOR, IRD);
 //GyroAccl gyro;
@@ -59,7 +59,7 @@ void setup() {
   //driver.setAdjustState();
 }
 
-volatile int startUpTime = 20;
+volatile int startUpTime = 50000;
 
 void loop() {
   // game logic here
