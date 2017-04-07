@@ -6,7 +6,7 @@
 #define CLOCKWISE 1
 #define ANTICLOCKWISE -1
 #define EPSILON 1.0
-#define CSTEPS 600
+#define CSTEPS 595
 #define CONVERSION 0.00824565001
 
 #include "Arduino.h"

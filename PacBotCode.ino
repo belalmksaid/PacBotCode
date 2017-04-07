@@ -15,7 +15,7 @@
 //sensors
 #define LSENSOR 18
 #define RSENSOR 17
-#define LDSENSOR 5
+#define LDSENSOR 12
 #define RDSENSOR 4
 #define FSENSOR 19
 #define BSENSOR 0
@@ -26,6 +26,7 @@
 //commands
 #define STOP 0
 #define START 1
+#define ASERIAL
 
 
 Motor motorRight(RMOTA, RMOTB, 2, 3);
@@ -38,10 +39,10 @@ Sensor rightD(RDSENSOR, IRD);
 Sensor leftD(LDSENSOR, IRD);
 //GyroAccl gyro;
 
-Driver driver(&motorLeft, &motorRight, &front, &back, &right, &left);
+Driver driver(&motorLeft, &motorRight, &front, &back, &right, &left, &rightD, &leftD);
 Schedule schedule(&driver, &front, &back, &right, &left, &rightD, &leftD);
 
-Map gMap;
+Map gMap(&driver);
 Logic logic(&driver, &gMap);
 
 volatile short command = START;
@@ -53,7 +54,7 @@ void setup() {
   pinMode(13, OUTPUT); 
   digitalWrite(13, HIGH);   // turn the LED on (HIGH is the voltage level)
   driver.init();
-  gMap.init(13, 13, 16, 17, UP);
+  gMap.init(13, 13, 16, 17, RIGHT);
   //delay(5000);
   //driver.setStraight();
   //driver.setAdjustState();

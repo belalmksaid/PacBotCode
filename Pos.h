@@ -5,10 +5,10 @@
 #define HBLOCKSIZE 1.75
 #define BEPSILON 0.01
 
-#define UP 1
-#define DOWN -1
-#define RIGHT 2
-#define LEFT -2
+#define UP 0
+#define DOWN 2
+#define RIGHT 1
+#define LEFT 3
 
 #include "Arduino.h"
 
@@ -20,20 +20,20 @@ public:
 		y1 = _y1;
 		y2 = _y2;
 		orien = o;
-		getPos();
+		updatePos();
 
 	}
 	Pos(double _x, double _y, char o) {
 		x = _x;
 		y = _y;
 		orien = o;
-		getInd();
+		updateInd();
 	}
 	double x, y;
 	int x1, x2, y1, y2;
 	char orien;
 
-	void getPos() {
+	void updatePos() {
 		if(x1 == x2)
 			x = x1 * BLOCKSIZE + HBLOCKSIZE;
 		x = (x1 * 0.5 + x2 * 0.5) * BLOCKSIZE + HBLOCKSIZE;
@@ -43,7 +43,7 @@ public:
 		y = (y1 * 0.5 + y1 * 0.5) * BLOCKSIZE + HBLOCKSIZE;
 	}
 
-	void getInd() {
+	void updateInd() {
 		double m = x / BLOCKSIZE;
 		x1 = ((int)m);
 		double r = x - x1 * BLOCKSIZE;

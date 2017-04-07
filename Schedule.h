@@ -7,7 +7,9 @@
 #include "Sensor.h"
 //#include "GyroAccl.h"
 
-#define GYROTIME 5
+#define frame() delay(10)
+
+//#define GYROTIME 5
 
 
 class Schedule {
@@ -29,6 +31,7 @@ public:
 		leftD->init();
 		rightD->init();
 		lefts->init();
+		rights->init();
 
 	}
 
@@ -44,17 +47,17 @@ public:
 
 	void updateSensors() {
 		//gyro->update(timestampA, timestampF);
-		fronts->update(timestampA);
-		lefts->update(timestampA);
-		rights->update(timestampA);
-		//Serial.print(lefts->getDistance());
-		//Serial.print("\t");
-		//Serial.println(rights->getDistance());
+		#ifdef ASENSOR
+		Serial.print(lefts->speed);
+		Serial.print("\t");
+		Serial.println(rights->speed);
+		#endif
+		driver->updateEncodersOnly(microA);
+		fronts->update(microA);
+		lefts->update(microA);
+		rights->update(microA);
 		rightD->update(timestampA);
 		leftD->update(timestampA);
-		driver->updateEncodersOnly(microA);
-		//rights->update(timestampA);
-
 	}
 
 	void updateSensorsOnly() {
@@ -66,9 +69,10 @@ public:
 	void update() {
 		takeTimeA();
 		updateSensors();
-		driver->update();
-		delay(10);
+		driver->update(microA);
+		frame();
 		takeTimeB();
+		loop++;
 	}
 
 private:
@@ -86,7 +90,7 @@ private:
 	Sensor* rightD;
 	//GyroAccl* gyro;
 	Driver* driver;
-	short gyroTime = GYROTIME;
+	//short gyroTime = GYROTIME;
 };
 
 #endif 

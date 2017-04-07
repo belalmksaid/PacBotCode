@@ -50,7 +50,9 @@ void PID::Reset() {
 
 bool PID::Compute()
 {
-   if(!inAuto) return false;
+   if(!inAuto) {
+    return false;
+  }
    unsigned long now = millis();
    unsigned long timeChange = (now - lastTime);
    if(timeChange>=SampleTime)
@@ -67,7 +69,6 @@ bool PID::Compute()
  
       /*Compute PID Output*/
       double output = kp * error + ITerm- kd * dInput;
-      
 	  if(output > outMax) output = outMax;
       else if(output < outMin) output = outMin;
 	  *myOutput = output;
@@ -77,7 +78,10 @@ bool PID::Compute()
       lastTime = now;
 	  return true;
    }
-   else return false;
+   else {
+    //Serial.println("PID");
+    return false;
+  }
 }
 
 
