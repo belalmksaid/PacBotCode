@@ -1,0 +1,326 @@
+<html>
+<head>
+	<script type="text/javascript" src="https://code.jquery.com/jquery-3.2.0.min.js"></script>
+	<style type="text/css">
+		#div1 tr {
+			height: 20px
+		}
+		#div1 td 
+		{
+			width: 20px;
+			border-style: solid;
+			border-width: 1px;
+		}
+	</style>
+</head>
+<body>
+<div id="div1"></div>
+<button onclick="exp2()">Export</button>
+<br/>
+<textarea id="data" style="width: 600px; height: 400px;"></textarea>
+<script type="text/javascript">
+
+
+	var maparr = [
+		[0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],
+		[0,1,1,1,1,1,1,1,1,1,1,1,1,1,0,1,1,1,1,1,1,1,1,1,1,1,1,1,0],
+		[0,1,1,1,1,1,1,1,1,1,1,1,1,1,0,1,1,1,1,1,1,1,1,1,1,1,1,1,0],
+		[0,1,1,0,0,0,1,1,0,0,0,0,1,1,0,1,1,0,0,0,0,1,1,0,0,0,1,1,0],
+		[0,1,1,0,0,0,1,1,0,0,0,0,1,1,0,1,1,0,0,0,0,1,1,0,0,0,1,1,0],
+		[0,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,0],
+		[0,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,0],
+		[0,1,1,0,0,0,1,1,0,1,1,0,0,0,0,0,0,0,1,1,0,1,1,0,0,0,1,1,0],
+		[0,1,1,1,1,1,1,1,0,1,1,1,1,1,0,1,1,1,1,1,0,1,1,1,1,1,1,1,0],
+		[0,1,1,1,1,1,1,1,0,1,1,1,1,1,0,1,1,1,1,1,0,1,1,1,1,1,1,1,0],
+		[0,0,0,0,0,0,1,1,0,0,0,0,1,1,0,1,1,0,0,0,0,1,1,0,0,0,0,0,0],
+		[0,1,1,1,1,0,1,1,0,1,1,1,1,1,1,1,1,1,1,1,0,1,1,0,1,1,1,1,0],
+		[0,1,1,1,1,0,1,1,0,1,1,1,1,1,1,1,1,1,1,1,0,1,1,0,1,1,1,1,0],
+		[0,0,0,0,0,0,1,1,0,1,1,0,0,2,2,2,0,0,1,1,0,1,1,0,0,0,0,0,0],
+		[0,4,4,4,4,4,1,1,1,1,1,0,2,2,2,2,2,0,1,1,1,1,1,4,4,4,4,4,0],
+		[0,4,4,4,4,4,1,1,1,1,1,0,2,2,2,2,2,0,1,1,1,1,1,4,4,4,4,4,0],
+		[0,0,0,0,0,0,1,1,0,1,1,0,0,0,0,0,0,0,1,1,0,1,1,0,0,0,0,0,0],
+		[0,1,1,1,1,0,1,1,0,1,1,1,1,1,1,1,1,1,1,1,0,1,1,0,1,1,1,1,0],
+		[0,1,1,1,1,0,1,1,0,1,1,1,1,1,1,1,1,1,1,1,0,1,1,0,1,1,1,1,0],
+		[0,0,0,0,0,0,1,1,0,1,1,0,0,0,0,0,0,0,1,1,0,1,1,0,0,0,0,0,0],
+		[0,1,1,1,1,1,1,1,1,1,1,1,1,1,0,1,1,1,1,1,1,1,1,1,1,1,1,1,0],
+		[0,1,1,1,1,1,1,1,1,1,1,1,1,1,0,1,1,1,1,1,1,1,1,1,1,1,1,1,0],
+		[0,1,1,0,0,0,1,1,0,0,0,0,1,1,0,1,1,0,0,0,0,1,1,0,0,0,1,1,0],
+		[0,1,1,1,1,0,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,0,1,1,1,1,0],
+		[0,1,1,1,1,0,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,0,1,1,1,1,0],
+		[0,0,0,1,1,0,1,1,0,1,1,0,0,0,0,0,0,0,1,1,0,1,1,0,1,1,0,0,0],
+		[0,1,1,1,1,1,1,1,0,1,1,1,1,1,0,1,1,1,1,1,0,1,1,1,1,1,1,1,0],
+		[0,1,1,1,1,1,1,1,0,1,1,1,1,1,0,1,1,1,1,1,0,1,1,1,1,1,1,1,0],
+		[0,1,1,0,0,0,0,0,0,0,0,0,1,1,0,1,1,0,0,0,0,0,0,0,0,0,1,1,0],
+		[0,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,0],
+		[0,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,0],
+		[0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0]
+	];
+	var mouseDown = 0;
+	var col = "black";
+	var nodes = new Array();
+	var edges = [];
+
+	var redges = [];
+	document.body.onmousedown = function() { 
+  	++mouseDown;
+	}
+	document.body.onmouseup = function() {
+  	--mouseDown;
+	}
+	var html = '<table><tbody>';
+	function ccolor(i, j, c) {
+		if(!mouseDown && !c) return;
+		//console.log($("#" + i + "c" + j).attr("selected"));
+		if($("#" + i + "c" + j).attr("select") == "no") {
+			$("#" + i + "c" + j).attr("select", "yes");
+			$("#" + i + "c" + j).css("background-color", col);
+			$("#" + i + "c" + j).attr("col", col);
+		}
+		else {
+			$("#" + i + "c" + j).attr("select", "no");
+		$("#" + i + "c" + j).css("background-color", "white");
+		$("#" + i + "c" + j).attr("col", "white");
+		}
+	}
+
+	function scolor(i, j) {
+		if($("#" + i + "c" + j).attr("select") == "no") {
+			$("#" + i + "c" + j).attr("select", "yes");
+			$("#" + i + "c" + j).css("background-color", "blue");
+			$("#" + i + "c" + j).attr("col", "blue");
+		}
+		else {
+			$("#" + i + "c" + j).attr("select", "no");
+		$("#" + i + "c" + j).css("background-color", "white");
+		$("#" + i + "c" + j).attr("col", "white");
+		}
+
+	}
+
+	function ecolor(i, j) {
+		$("#" + i + "c" + j).attr("select", "no");
+		$("#" + i + "c" + j).css("background-color", "red");
+		$("#" + i + "c" + j).attr("col", "white");
+
+	}
+
+	n = 32;
+	n2 = 29;
+for (var i = 0; i < n; ++i) {
+    html += '<tr>';
+    for (var j = 0; j < n2; ++j ) {
+        html += "<td select='no' id='" + i + "c" + j + "' onclick='ccolor(" + i + "," + j + ", true)' onmouseover='ccolor(" + i + "," + j + ", false)' done='false' col='white'></td>";
+    }
+    html += "</tr>";
+}
+
+
+html += '</tbody></table>';
+
+$(html).appendTo('#div1');
+
+for (var i = 0; i < n; ++i) {
+	for (var j = 0; j < n2; ++j ) {
+		if(maparr[i][j] == 0) {
+			scolor(i, j);
+		}
+	}
+}
+
+
+function exp2() {
+
+	var t = "";
+	var c = 0;
+
+	var ec = 0;
+	for(var x = 0; x < n; x++) {
+		for(var y = 0; y < n2; y++) {
+			var el = $("#" + x + "c" + y);
+			if(el.attr("col") == "black" && el.attr("done") == "false") {
+				el.attr("done", "true")
+				nodes.push(getNode(x, y));
+				var name = (nodes[c].x1 * 1000000 +  10000 * nodes[c].x2 + nodes[c].y1 * 100 +  nodes[c].y2) + "";
+				nodes[c].name = name;
+				t += "Node *n" + name + " = new Node("+ nodes[c].x1 + ", " + nodes[c].x2 + ", " + nodes[c].y1 +", " + nodes[c].y2 +", " + nodes[c].edges.length +"); //Node (" + nodes[c].x1 + ", " + nodes[c].x2 + ", " + nodes[c].y1 + ", " + nodes[c].y2  + ")\r\n";
+				//t += "n" + name + "->edges =  new Edge[" + nodes[c].edges.length + "];\r\n";
+				t += "hashMap[" + c + "](" + name + ", n" + name +");\r\n";
+				c++;
+			}
+
+		}
+	}
+
+	t+= "\r\n\r\n\r\n";
+
+	for(var  i = 0; i < redges.length; i++) {
+		var name = redges[i][0].replace(",", "_");
+		redges[i][1].name = redges[i][0];
+		t += "Edge *e" + name + " = new Edge(" + redges[i][1].x1 + ", " + redges[i][1].x2 + ", " + redges[i][1].y1 + ", " + redges[i][1].y2 + ", " + redges[i][1].nodes.length + ");\r\n";
+		t += "e" + name + "->length = " + (3.5 * (redges[i][1].x2 - redges[i][1].x1 + 1) * 3.5 * (redges[i][1].y2 - redges[i][1].y1 + 1) / 7.0) +  ";\r\n";
+		//t += "e" + name + "->nodes = new Node[" + redges[i][1].nodes.length + "];\r\n";
+
+		for(var j = 0; j < redges[i][1].nodes.length; j++) {
+			t += "//Connects Node (" + redges[i][1].nodes[j].x1 + ", " + redges[i][1].nodes[j].x2 + ", " + redges[i][1].nodes[j].y1 + ", " + redges[i][1].nodes[j].y2  +")\r\n";
+			t += "e" + name + "->nodes[" + j + "] = n" + redges[i][1].nodes[j].name + ";\r\n";
+
+		}
+		t+="\r\n";
+	}
+
+	t+= "\r\n\r\n\r\n";
+
+	for(var i = 0; i < nodes.length; i++) {
+		for(var j = 0; j < nodes[i].edges.length; j++) {
+			t += "n" + nodes[i].name + "->edges[" + j + "] = e" + nodes[i].edges[j].name.replace(",", "_") + ";\r\n";
+		}
+	}
+
+	data.innerHTML = t;
+}
+
+function Node(_x, _y) {
+	this.x1 = _x[0];
+	this.x2 = _x[1];
+	this.y1 = _y[0];
+	this.y2 = _y[1];
+	this.edges = [];
+}
+
+function edge(_x, _y) {
+	for(var i = _y[0]; i <= _y[_y.length - 1]; i++) {
+		for(var j = _x[0]; j <= _x[_x.length - 1]; j++) {
+			ecolor(i, j);
+		}
+	}
+	this.x1 = _x[0];
+	this.x2 = _x[_x.length - 1];
+	this.y1 = _y[0];
+	this.y2 = _y[_y.length - 1];
+	this.nodes = [];
+}
+
+function gEdge(_x, _y) {
+	var val = _x[0] * 1000 + _x[_x.length - 1] + "," + _y[0] * 1000 + _y[_y.length - 1];
+	if(edges[val] == undefined) {
+		edges[val] = new edge(_y, _x);
+		redges.push([val, edges[val]]);
+	}
+	return edges[val];
+}
+
+function getEdges(x1, y1, n) {
+	var x = [], y = [];
+	for(var i = x1[0] - 1; i >= 0; i--) {
+		var el = $("#" + (i) + "c" + (y1[0]));
+		if(el.attr("col") == "white" && el.attr("done") == "false") {
+			x.push(i);
+		}
+		else {
+			break;
+		}
+	}
+	x.sort(function(a,b){return a - b});
+	if(x.length > 0) {
+		var e = gEdge(x, y1);
+		e.nodes.push(n);
+		n.edges.push(e);
+	}
+
+	x = [], y = [];
+	for(var i = x1[1] + 1; i < 32; i++) {
+		var el = $("#" + (i) + "c" + (y1[0]));
+		var el2 = $("#" + (i) + "c" + (y1[1]));
+		if(el.attr("col") == "white" && el.attr("done") == "false" && el2.attr("col") == "white" && el2.attr("done") == "false") {
+			x.push(i);
+		}
+		else {
+			break;
+		}
+	}
+	x.sort(function(a,b){return a - b});
+	if(x.length > 0) {
+		var e = gEdge(x, y1);
+		e.nodes.push(n);
+		n.edges.push(e);
+	}
+
+	x = [], y = [];
+	for(var i = y1[0] - 1; i >= 0; i--) {
+		var el = $("#" + (x1[0]) + "c" + (i));
+		if(el.attr("col") == "white" && el.attr("done") == "false") {
+			y.push(i);
+		}
+		else {
+			break;
+		}
+	}
+	y.sort(function(a,b){return a - b});
+	if(y.length > 0) {
+		var e = gEdge(x1, y);
+		e.nodes.push(n);
+		n.edges.push(e);
+	}
+
+	x = [], y = [];
+	for(var i = y1[1] + 1; i < 29; i++) {
+		var el = $("#" + (x1[0])+ "c" + (i));
+		if(el.attr("col") == "white" && el.attr("done") == "false") {
+			y.push(i);
+		}
+		else {
+			break;
+		}
+	}
+	y.sort(function(a,b){return a - b});
+	if(y.length > 0) {
+		var e = gEdge(x1, y);
+		e.nodes.push(n);
+		n.edges.push(e);
+	}
+}
+
+function getNode(x, y) {
+	var x1 = [x], y2 = [y];
+	for(var va = -1; va <=1 ; va++) {
+		for(var ha = -1; ha <= 1; ha++) {
+			var el = $("#" + (x + ha) + "c" + (y + va));
+			if(el.attr("col") == "black" && el.attr("done") == "false") {
+				if(x1.indexOf(x + ha) == -1)
+					x1.push(x + ha);
+				if(y2.indexOf(y + va) == -1)
+					y2.push(y + va);
+				el.attr("done", "true"); 
+			}
+		}
+	}
+	x1.sort(function(a,b){return a - b});
+	y2.sort(function(a,b){return a - b});
+	var n = new Node(y2, x1);
+	getEdges(x1, y2, n);
+	return n;
+
+}
+
+function exp()
+{
+	var arr = "{";
+	var all = $("td");
+	for(var i = 0; i < all.length; i++) {
+		if(i % n2 == 0) {
+			arr += "{";
+		}
+		arr += $(all[i]).attr("select") == "yes" ? "0" : "1";
+		if(i % n2 == n2 - 1) {
+			arr += "},";
+		}
+		else {
+			arr += ",";
+		}
+	}
+	arr += "}";
+	data.innerHTML = arr;
+}
+</script>
+</body>
+</html>
