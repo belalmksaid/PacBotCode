@@ -48,13 +48,15 @@ Logic logic(&driver, &gMap);
 volatile short command = START;
 
 void setup() {
-  Serial.begin(9600);
+  //Serial.begin(9600);
   //attachInterrupt(0, dmpDataReadyWrapper, RISING);
   schedule.init();
   pinMode(13, OUTPUT); 
   digitalWrite(13, HIGH);   // turn the LED on (HIGH is the voltage level)
   driver.init();
+  //while(!Serial) {}
   gMap.init(13, 13, 16, 17, RIGHT);
+  gMap.pac->printd();
   //delay(5000);
   //driver.setStraight();
   //driver.setAdjustState();

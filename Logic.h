@@ -16,12 +16,19 @@ public:
 		map = m;
 		driver = d;
 		pos = d->leftMotor->encoderPos1;
-		d->setStraight();
+		//d->setStraight();
+		//d->setAdjust();
 	}
 
 	void update() {
+		// if(driver->status == SLEEP) {
+		// 	driver->setStraight();
+		// }
+		// else if(driver->fronts->distance <= 6) {
+		// 	driver->setCCW();
+		// }
 		map->update();
-		wander();
+		controlledWander();
 		//assessOptions();
 		/*if((driver->leftMotor->encoderPos1) * CONVERSION >= 15.75) {
 			driver->freeze();
@@ -69,26 +76,28 @@ public:
 
 	}
 	int r = 0;
-	void wander() {
-		if(driver->status != TURNINGLEFT && driver->status != TURNINGRIGHT) return;
-		if(grace) {
-			driver->setStraight();
-			if(driver->rightD->getState() == COVERED && driver->leftD->getState() == COVERED) {
-				grace = false;
-			}
-		}
-		else {
-			map->getOptions();
+	void controlledWander() { // move randomly in the map, for testing only
+		if(driver->status == TURNINGLEFT || driver->status == TURNINGRIGHT || driver->status == TURNINGBACKCW || driver->status == TURNINGBACKCCW) return;
+		
+
+		if(driver->status == SLEEP || map->atDecisionPoint) { // Check if the robot is asleep moving or if the robot is at a decision point
+			map->getOptions(); // find possible options at the current block
 			r = random(0, map->noptions);
 			if(map->options[r] == TurnRight) {
 				driver->setRight();
-				grace = true;
+				Serial.println((int)map->options[r]);
 			}
 			else if(map->options[r] == TurnLeft) {
 				driver->setLeft();
-				grace = true;
+			}
+			else if(map->options[r] == KeepForward) {
+				driver->setStraight();
 			}
 		}
+
+	}
+
+	void wander() {
 
 	}
 
@@ -98,7 +107,6 @@ private:
 	int n;
 	bool hasPath = false;
 	char mode = CAUTIOUS;
-	bool grace = false;
 };
 
 #endif

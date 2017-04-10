@@ -11,12 +11,15 @@
 #define COVERED 0
 #define OPEN 1
 
+#define ceiling 3.8
+
 #include "Arduino.h"
 
 class Sensor {
 public:
 	double distance = 0.0;
 	double speed = 0.0;
+	
 	Sensor(short p, char ty) {
 		pin = p;
 		type = ty;
@@ -32,7 +35,7 @@ public:
 		}
 		else if(type == IRSHORTL) {
 			val = analogRead(pin);
-			if(ts - timeStamp < 75000)
+			if(ts - timeStamp < 70000)
 				return;
 			oldDistance = distance;
 			distance = 0.0;
@@ -46,16 +49,20 @@ public:
     			distance += chain[i + 1];
     			speed += speedChain[i + 1];
     		}
-			chain[CHAINSIZE - 1] = (1205.254/(val + 80.154) + -1.023) / 5.0;
+			chain[CHAINSIZE - 1] = (2335.58/(val * 5.0 - 357.47) + -.19173) / 5.0;
 			timeChain[CHAINSIZE - 1] = (ts - timeStamp) / 1000000.0;
 			distance += chain[4];
 			speedChain[CHAINSIZE - 1] = (chain[CHAINSIZE - 1] - chain[0]) / (timeAvg);
 			speed += speedChain[CHAINSIZE - 1] / 5.0;
 			timeStamp = ts;
+			if(distance > ceiling || distance < 0) {
+				distance = 0;
+				speed = 0;
+			}
 		}
 		else if(type == IRSHORTR) {
 			val = analogRead(pin);
-			if(ts - timeStamp < 75000)
+			if(ts - timeStamp < 70000)
 				return;
 			oldDistance = distance;
 			distance = 0.0;
@@ -69,12 +76,16 @@ public:
     			distance += chain[i + 1];
     			speed += speedChain[i + 1];
     		}
-			chain[CHAINSIZE - 1] = (2222.4745/(val + 244.088) + -1.7941) / 5.0;
+			chain[CHAINSIZE - 1] = (3611.852/(val * 5.0 - 37.49) + -.40869) / 5.0;
 			timeChain[CHAINSIZE - 1] = (ts - timeStamp) / 1000000.0;
 			distance += chain[4];
 			speedChain[CHAINSIZE - 1] = (chain[CHAINSIZE - 1] - chain[0]) / (timeAvg);
 			speed += speedChain[CHAINSIZE - 1] / 5.0;
 			timeStamp = ts;
+			if(distance > ceiling || distance < 0) {
+				distance = 0;
+				speed = 0;
+			}
 		}
 		else if(type == IR) {
 			val = analogRead(pin);
@@ -107,12 +118,6 @@ public:
 		return val;
 	}
 
-	double getDistance() {
-		if(type != IRD) {
-			return distance;
-		}
-		return val;
-	}
 private:
 	short pin;
 	char type;

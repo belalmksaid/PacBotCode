@@ -1,0 +1,10 @@
+- Finish blind man map navigation system
+	- stop robot from going into ghost den
+	- fix ghost den blind man disruption
+	- add missing edges for bottom of the map
+
+- Blind man path following
+
+- Start map solving algorithm
+
+- fix one wall adjustment

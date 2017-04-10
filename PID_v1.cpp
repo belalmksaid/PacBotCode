@@ -46,6 +46,7 @@ PID::PID(double* Input, double* Output, double* Setpoint,
  **********************************************************************************/ 
 void PID::Reset() {
   lastTime = millis()-SampleTime;
+  ITerm = 0.0;
 }
 
 bool PID::Compute()

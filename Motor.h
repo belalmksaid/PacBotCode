@@ -29,22 +29,8 @@ public:
 		value = max(value, MINSPEED);
 	}
 
-	void incrementValue(int a) {
-		value += a;
-		value = min(value, MAXSPEED);
-		value = max(value, MINSPEED);
-	}
-
 	void setDirection(char d) {
 		direction = d;
-	}
-
-	void flipDirection() {
-		direction = -direction;
-	}
-
-	char getDirection() {
-		return direction;
 	}
 
 	void updateEncoder(unsigned long nframe) {

@@ -34,13 +34,8 @@ public:
 	char orien;
 
 	void updatePos() {
-		if(x1 == x2)
-			x = x1 * BLOCKSIZE + HBLOCKSIZE;
-		x = (x1 * 0.5 + x2 * 0.5) * BLOCKSIZE + HBLOCKSIZE;
-
-		if(y1 == y2)
-			y = y1 * BLOCKSIZE + HBLOCKSIZE;
-		y = (y1 * 0.5 + y1 * 0.5) * BLOCKSIZE + HBLOCKSIZE;
+		x = ((x1 - 1.0) * 0.5 + (x2 - 1.0) * 0.5) * BLOCKSIZE + HBLOCKSIZE;
+		y = ((y1 - 1.0) * 0.5 + (y2 - 1.0) * 0.5) * BLOCKSIZE + HBLOCKSIZE;
 	}
 
 	void updateInd() {
@@ -71,6 +66,25 @@ public:
 			y2 = y1;
 			y1--;
 		}
+		y1++;
+		y2++;
+		x1++;
+		x2++;
+	}
+
+	void print() {
+		Serial.print(x1);
+		Serial.print("\t");
+		Serial.print(x2);
+		Serial.print("\t");
+		Serial.print(y1);
+		Serial.print("\t");
+		Serial.println(y2);
+	}
+	void printd() {
+		Serial.print(x);
+		Serial.print("\t");
+		Serial.println(y);
 	}
 };
 
