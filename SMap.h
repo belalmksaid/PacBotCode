@@ -2,6 +2,7 @@
 #define SMAP
 
 #include "HashMap.h"
+#include "Pos.h"
 
 class Edge;
 
@@ -20,8 +21,8 @@ public:
 		edges = new Edge*[_n];
 	}
 
-	bool operator==(const Node& a, const Node& b) {
-		return a.x1 == b.x1 && a.x2 == b.x2 && a.y1 == b.y1 && a.y2 == b.y2; 
+	bool operator==(const Node& a) {
+		return a.x1 == (*this).x1 && a.x2 == (*this).x2 && a.y1 == (*this).y1 && a.y2 == (*this).y2; 
 	}
 };
 
@@ -914,6 +915,10 @@ public:
 		n15162930->edges[2] = e29030_1700025;
 		n26272930->edges[0] = e28028_2600027;
 		n26272930->edges[1] = e29030_1700025;
+	}
+
+	void updateCurrentNode(Pos* p) {
+		cNode = hashMap.getValueOf(p->x1 * 1000000 +  10000 * p->x2 + p->y1 * 100 +  p->y2);
 	}
 
 	Node* getNode(int x1, int x2, int y1, int y2) {

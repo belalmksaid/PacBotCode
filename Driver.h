@@ -55,7 +55,11 @@ public:
 	PID* walld, *walls;
 	PID* pidspeed;
 	PID* pidturnR, *pidturnL;
-	double d = 0.0;
+	PID* hlwalld, *hlwalls;
+	PID* hrwalld, *hrwalls;
+
+	double ilength = 2.75; // ideal side distance
+	double ispeed = 0.0; // ideal speed
 
 	Driver(Motor* left, Motor* right, Sensor* a, Sensor* b, Sensor* c, Sensor* dd, Sensor* rd, Sensor* ld) {
 		leftMotor = left;
@@ -72,6 +76,10 @@ public:
 		pidturnR =  new PID(&dummyRight, &rightMasterPWM, &desiredSpeed, .01, 25, .05, DIRECT);
 		walld = new PID(&rights->distance, &distanceAdjust, &lefts->distance, 0.25, 2, 0.1, DIRECT); //1,0,.2
 		walls = new PID(&rights->speed, &speedAdjust, &lefts->speed, 2, 0, 0.5, DIRECT); //1,0,0
+		hlwalld = new PID(&lefts->distance, &distanceAdjust, &ilength, 0.25, 2, 0.1, DIRECT); //1,0,.2
+		hlwalls = new PID(&lefts->speed, &speedAdjust, &ispeed, 2, 0, 0.5, DIRECT); //1,0,0
+		hrwalld = new PID(&rights->distance, &distanceAdjust, &ilength, 0.25, 2, 0.1, DIRECT); //1,0,.2
+		hrwalls = new PID(&rights->speed, &speedAdjust, &ispeed, 2, 0, 0.5, DIRECT); //1,0,0
 	}
 
 	void init() {
@@ -88,6 +96,18 @@ public:
 		walls->SetMode(AUTOMATIC);
 		walls->SetSampleTime(75);
 		walls->SetOutputLimits(-6, 6);
+		hlwalld->SetMode(AUTOMATIC);
+		hlwalld->SetSampleTime(75);
+		hlwalld->SetOutputLimits(-6, 6);
+		hlwalls->SetMode(AUTOMATIC);
+		hlwalls->SetSampleTime(75);
+		hlwalls->SetOutputLimits(-6, 6);
+		hrwalld->SetMode(AUTOMATIC);
+		hrwalld->SetSampleTime(75);
+		hrwalld->SetOutputLimits(-6, 6);
+		hrwalls->SetMode(AUTOMATIC);
+		hrwalls->SetSampleTime(75);
+		hrwalls->SetOutputLimits(-6, 6);
 	}
 
 	void setAdjust() {
@@ -372,11 +392,11 @@ private:
 			dummyLeft += v / 3.0;
 			pid->Compute();
 			pidspeed->Compute();
-			// Serial.print(lefts->distance);
-			// Serial.print("\t");
+			Serial.print(lefts->distance);
+			Serial.print("\t");
 			// Serial.print(lefts->speed);
 			// Serial.print("\t");
-			// Serial.print(rights->distance);
+			Serial.println(rights->distance);
 			// Serial.println("\t");
 			Serial.println(v);
 			// Serial.print("\t");
@@ -401,7 +421,7 @@ private:
 		rightMotor->setValue((int)rightMasterPWM);
 		leftMotor->move();
 		rightMotor->move();
-		twoWallCalibrate();
+		calibrate();
 		pid->Compute();
 		pidspeed->Compute();
 		#ifdef ASERIAL
@@ -412,8 +432,30 @@ private:
 		#endif
 	}
 
-	void twoWallCalibrate() {
-		if(lefts->distance >= 0.5 && rights->distance >= 0.5 && (lefts->distance <= 2 || rights->distance <= 2)) {
+	void calibrate() {
+		if(lefts->distance == 0.0 && rights->distance > 0.0 && rights->distance <= 2.0) {
+			walls->Reset();
+			walld->Reset();
+			hlwalls->Reset();
+			hlwalls->Reset();
+			hrwalls->Compute();
+			hrwalld->Compute();
+			dummyLeft += ((distanceAdjust + speedAdjust) > thre ? (distanceAdjust + speedAdjust) - thre : (distanceAdjust + speedAdjust) < -thre ? (distanceAdjust + speedAdjust) + thre : 0) / 6.0;
+		}
+		else if(rights->distance == 0.0 && lefts->distance > 0.0 && lefts->distance <= 2.0) {
+			walls->Reset();
+			walld->Reset();
+			hrwalls->Reset();
+			hrwalls->Reset();
+			hlwalls->Compute();
+			hlwalld->Compute();
+			dummyLeft += ((distanceAdjust + speedAdjust) > thre ? (distanceAdjust + speedAdjust) - thre : (distanceAdjust + speedAdjust) < -thre ? (distanceAdjust + speedAdjust) + thre : 0) / 6.0;
+		}
+		else if(lefts->distance >= 0.5 && rights->distance >= 0.5 && (lefts->distance <= 2 || rights->distance <= 2)) {
+			hlwalls->Reset();
+			hlwalls->Reset();
+			hrwalls->Reset();
+			hrwalls->Reset();
 			walld->Compute();
 			walls->Compute();
 			dummyLeft += ((distanceAdjust + speedAdjust) > thre ? (distanceAdjust + speedAdjust) - thre : (distanceAdjust + speedAdjust) < -thre ? (distanceAdjust + speedAdjust) + thre : 0) / 3.0;
@@ -428,6 +470,10 @@ private:
 			// Serial.println("\t");
 			walls->Reset();
 			walld->Reset();
+			hlwalls->Reset();
+			hlwalls->Reset();
+			hrwalls->Reset();
+			hrwalls->Reset();
 		}
 	}
 	// long prev = 0;

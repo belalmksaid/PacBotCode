@@ -9,4 +9,4 @@
 - Start map solving algorithm
 	- use A*
 
-- fix one wall adjustment
+- fix one wall adjustment x

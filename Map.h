@@ -5,6 +5,7 @@
 #include "Ghost.h"
 #include "Driver.h"
 #include "SMap.h"
+#include "Path.h"
 
 #define BLOCK 0
 #define PATH 1
@@ -108,6 +109,8 @@ public:
 	short noptions = 0;
 	bool isLost = false;
 
+	Path* path;
+
 
 	bool busy = false; // used to update orientation once when the robot is turning
 	bool updateProjections = true; // used to get a projection only once, saves calculation time
@@ -125,7 +128,6 @@ public:
 	void update() {
 		updateProj();
 		updateBotPos();
-		sync();
 	}
 
 	void getOptions() {
@@ -169,14 +171,14 @@ public:
 		else if(pac->orien == RIGHT) {
 			// Serial.println(pac->x1);
 			// Serial.println(pac->y2);
-			// // Serial.println("wtf");
-			// // Serial.println((int)map[pac->y2 + 1][pac->x1]);
+			// Serial.println("wtf");
+			// Serial.println((int)map[pac->y2 + 1][pac->x1]);
 			if(map[pac->y1 - 1][pac->x1] > 0 && map[pac->y1 - 1][pac->x2] > 0) {
 				options[noptions] = TurnLeft;
 				noptions++;
 			}
 			if(map[pac->y2 + 1][pac->x1] > 0 && map[pac->y2 + 1][pac->x2] > 0) {
-				// Serial.println("wtf");
+				// Serial.println((int)map[pac->y2 + 1][pac->x2]);
 				// Serial.println(pac->x1);
 				// Serial.println(pac->y2 + 1);
 				options[noptions] = TurnRight;
@@ -307,10 +309,6 @@ public:
 
 	}
 
-	void decisionMade() {
-
-	}
-
 	void updateBotPos() {
 		if(driver->status == MOVINGFORWARD) {
 			busy = false;
@@ -322,6 +320,7 @@ public:
 				pac->y1 = ploc->y1;
 				pac->y2 = ploc->y2;
 				pac->updatePos();
+				solMap->updateCurrentNode(pac);
 				dir = -1;
 				atDecisionPoint = true;
 
@@ -370,10 +369,6 @@ public:
 		else {
 			busy = false;
 		}
-	}
-
-
-	void sync() {
 	}
 
 };

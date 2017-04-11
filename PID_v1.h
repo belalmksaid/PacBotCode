@@ -65,12 +65,12 @@ class PID
     double ki;                  // * (I)ntegral Tuning Parameter
     double kd;                  // * (D)erivative Tuning Parameter
 
-	int controllerDirection;
-
     double *myInput;              // * Pointers to the Input, Output, and Setpoint variables
     double *myOutput;             //   This creates a hard link between the variables and the 
     double *mySetpoint;           //   PID, freeing the user from having to constantly tell us
                                   //   what these values are.  with pointers we'll just know.
+
+	int controllerDirection;
 			  
 	unsigned long lastTime;
 	double ITerm, lastInput;

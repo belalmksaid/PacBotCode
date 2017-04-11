@@ -11,7 +11,7 @@
 #define COVERED 0
 #define OPEN 1
 
-#define ceiling 3.8
+#define ceiling 3.8 // maximum distance by the Sensor
 
 #include "Arduino.h"
 
