@@ -3,6 +3,7 @@
 
 #include "HashMap.h"
 #include "Pos.h"
+#include "Arduino.h"
 
 class Edge;
 
@@ -11,6 +12,11 @@ public:
 	Edge** edges;
 	int x1, x2, y1, y2;
 	short n = 0;
+	bool visited = false;
+
+	double f, g, h;
+	double cost;
+	Node* parent = NULL;
 
 	Node(int _x1, int _x2, int _y1, int _y2, short _n) {
 		x1 = _x1;
@@ -20,9 +26,71 @@ public:
 		n = _n;
 		edges = new Edge*[_n];
 	}
+	// void reset() {
+	// 	visited = false;
+	// 	if(n >= 1 && edges[0]->visited) {
+	// 		edges[0]->reset();
+	// 	}
+	// 	if(n >= 2 && edges[1]->visited) {
+	// 		edges[1]->reset();
+	// 	}
+	// 	if(n >= 3 && edges[2]->visited) {
+	// 		edges[2]->reset();
+	// 	}
+	// }
+
+	int getHash() {
+		return x1 * 1000000 +  10000 * x2 + y1 * 100 +  y2;	
+	}
+
+	void print() {
+		Serial.print(x1);
+		Serial.print("\t");
+		Serial.print(x2);
+		Serial.print("\t");
+		Serial.print(y1);
+		Serial.print("\t");
+		Serial.println(y2);
+	}
+
+	void printNEdges() {
+		Serial.println(n);
+	}
+
+	// void traverse() {
+	// 	visited = true;
+	// 	Serial.print("Node: ");
+	// 	print();
+	// 	Serial.print("There are ");
+	// 	Serial.print(n);
+	// 	Serial.println(" edges");
+	// 	if(n >= 1) {
+	// 		edges[0]->print();
+	// 	}
+	// 	if(n >= 2) {
+	// 		edges[1]->print();
+	// 	}
+	// 	if(n >= 3 ) {
+	// 		edges[2]->print();
+	// 	}
+
+	// 	if(n >= 1) {
+	// 		edges[0]->traverse();
+	// 	}
+	// 	if(n >= 2) {
+	// 		edges[1]->traverse();
+	// 	}
+	// 	if(n >= 3 ) {
+	// 		edges[2]->traverse();
+	// 	}
+	// }
 
 	bool operator==(const Node& a) {
 		return a.x1 == (*this).x1 && a.x2 == (*this).x2 && a.y1 == (*this).y1 && a.y2 == (*this).y2; 
+	}
+
+	bool operator!=(const Node& a) {
+		return a.x1 != (*this).x1 || a.x2 != (*this).x2 || a.y1 != (*this).y1 || a.y2 != (*this).y2; 
 	}
 };
 
@@ -32,7 +100,19 @@ public:
 	int x1, x2, y1, y2;
 	short n = 0;
 
+	bool visited = false;
+
 	double length = 0;
+
+	// void reset() {
+	// 	visited = false;
+	// 	if(n >= 1 && nodes[0]->visited) {
+	// 		nodes[0]->reset();
+	// 	}
+	// 	if(n >= 2 && nodes[1]->visited) {
+	// 		nodes[1]->reset();
+	// 	}
+	// }
 
 	Edge(int _x1, int _x2, int _y1, int _y2, short _n) {
 		x1 = _x1;
@@ -41,6 +121,25 @@ public:
 		y2 = _y2;
 		n = _n;
 		nodes = new Node*[_n];
+	}
+
+	// void traverse() {
+	// 	if(n >= 1 && !nodes[0]->visited) {
+	// 		nodes[0]->traverse();
+	// 	}
+	// 	if(n >= 2 && !nodes[1]->visited) {
+	// 		nodes[1]->traverse();
+	// 	}
+	// }
+
+	void print() {
+		Serial.print(x1);
+		Serial.print("\t");
+		Serial.print(x2);
+		Serial.print("\t");
+		Serial.print(y1);
+		Serial.print("\t");
+		Serial.println(y2);
 	}
 
 };
@@ -919,6 +1018,10 @@ public:
 
 	void updateCurrentNode(Pos* p) {
 		cNode = hashMap.getValueOf(p->x1 * 1000000 +  10000 * p->x2 + p->y1 * 100 +  p->y2);
+	}
+
+	Node* getNode(Pos* p) {
+		return hashMap.getValueOf(p->x1 * 1000000 +  10000 * p->x2 + p->y1 * 100 +  p->y2);
 	}
 
 	Node* getNode(int x1, int x2, int y1, int y2) {

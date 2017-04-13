@@ -25,10 +25,11 @@
 
 #define BD 3.723475
 #define WD 1.5575
-#define STEPS90 BD * PI / 4.0 / (WD * PI) * CSTEPS - 29
+#define STEPS90 BD * PI / 4.0 / (WD * PI) * CSTEPS - 19
 #define STEPS180 (STEPS90) * 2.0 + 25.0
 
 #define thre 0.32
+#define thhre 0.45
 
 
 class Driver {
@@ -58,7 +59,7 @@ public:
 	PID* hlwalld, *hlwalls;
 	PID* hrwalld, *hrwalls;
 
-	double ilength = 2.75; // ideal side distance
+	double ilength = 0.0; // ideal side distance
 	double ispeed = 0.0; // ideal speed
 
 	Driver(Motor* left, Motor* right, Sensor* a, Sensor* b, Sensor* c, Sensor* dd, Sensor* rd, Sensor* ld) {
@@ -74,12 +75,12 @@ public:
 		pidspeed = new PID(&rightMotor->speed, &rightMasterPWM, &desiredSpeed, 2, 0.5, 0, DIRECT);
 		pidturnL = new PID(&dummyLeft, &leftPWM, &desiredSpeed, .01, 25, .05, DIRECT);
 		pidturnR =  new PID(&dummyRight, &rightMasterPWM, &desiredSpeed, .01, 25, .05, DIRECT);
-		walld = new PID(&rights->distance, &distanceAdjust, &lefts->distance, 0.25, 2, 0.1, DIRECT); //1,0,.2
-		walls = new PID(&rights->speed, &speedAdjust, &lefts->speed, 2, 0, 0.5, DIRECT); //1,0,0
-		hlwalld = new PID(&lefts->distance, &distanceAdjust, &ilength, 0.25, 2, 0.1, DIRECT); //1,0,.2
-		hlwalls = new PID(&lefts->speed, &speedAdjust, &ispeed, 2, 0, 0.5, DIRECT); //1,0,0
-		hrwalld = new PID(&rights->distance, &distanceAdjust, &ilength, 0.25, 2, 0.1, DIRECT); //1,0,.2
-		hrwalls = new PID(&rights->speed, &speedAdjust, &ispeed, 2, 0, 0.5, DIRECT); //1,0,0
+		walld = new PID(&rights->distance, &distanceAdjust, &lefts->distance, .3, 0.00005, 0.1, DIRECT); //.25,2,.1
+		walls = new PID(&rights->speed, &speedAdjust, &lefts->speed, .5, 0.001, 0, DIRECT); //2,0,0.5
+		hlwalld = new PID(&lefts->distance, &distanceAdjust, &ilength, 5, .00005, 0.5, DIRECT); //1,0,.2
+		hlwalls = new PID(&lefts->speed, &speedAdjust, &ispeed, .5, 0.00, 0.0, DIRECT); //1,0,0
+		hrwalld = new PID(&rights->distance, &distanceAdjust, &ilength, 5, .00005, 0.5, DIRECT); //1,0,.2
+		hrwalls = new PID(&rights->speed, &speedAdjust, &ispeed, .5, .0, 0.0, DIRECT); //1,0,0
 	}
 
 	void init() {
@@ -433,25 +434,30 @@ private:
 	}
 
 	void calibrate() {
-		if(lefts->distance == 0.0 && rights->distance > 0.0 && rights->distance <= 2.0) {
+		if(lefts->distance == 0.0 && rights->distance > 0.0 && rights->distance <= 3.25) {
 			walls->Reset();
 			walld->Reset();
 			hlwalls->Reset();
 			hlwalls->Reset();
 			hrwalls->Compute();
 			hrwalld->Compute();
-			dummyLeft += ((distanceAdjust + speedAdjust) > thre ? (distanceAdjust + speedAdjust) - thre : (distanceAdjust + speedAdjust) < -thre ? (distanceAdjust + speedAdjust) + thre : 0) / 6.0;
+			dummyLeft += ((distanceAdjust + speedAdjust) > thhre ? (distanceAdjust + speedAdjust) - thhre : (distanceAdjust + speedAdjust) < -thhre ? (distanceAdjust + speedAdjust) + thhre : 0) / 6.0;
+		// 	Serial.println(rights->distance);
+		// 	Serial.println(((distanceAdjust + speedAdjust) > thre ? (distanceAdjust + speedAdjust) - thre : (distanceAdjust + speedAdjust) < -thre ? (distanceAdjust + speedAdjust) + thre : 0) / 6.0);
 		}
-		else if(rights->distance == 0.0 && lefts->distance > 0.0 && lefts->distance <= 2.0) {
+		else if(rights->distance == 0.0 && lefts->distance > 0.0 && lefts->distance <= 3.25) {
 			walls->Reset();
 			walld->Reset();
 			hrwalls->Reset();
 			hrwalls->Reset();
 			hlwalls->Compute();
 			hlwalld->Compute();
-			dummyLeft += ((distanceAdjust + speedAdjust) > thre ? (distanceAdjust + speedAdjust) - thre : (distanceAdjust + speedAdjust) < -thre ? (distanceAdjust + speedAdjust) + thre : 0) / 6.0;
+			dummyLeft -= ((distanceAdjust + speedAdjust) > thre ? (distanceAdjust + speedAdjust) - thre : (distanceAdjust + speedAdjust) < -thre ? (distanceAdjust + speedAdjust) + thre : 0) / 6.0;
+			// Serial.println("Left");
+			// Serial.println(((distanceAdjust + speedAdjust) > thre ? (distanceAdjust + speedAdjust) - thre : (distanceAdjust + speedAdjust) < -thre ? (distanceAdjust + speedAdjust) + thre : 0) / 6.0);
 		}
-		else if(lefts->distance >= 0.5 && rights->distance >= 0.5 && (lefts->distance <= 2 || rights->distance <= 2)) {
+		else 
+			if(lefts->distance >= 0.5 && rights->distance >= 0.5 && (lefts->distance <= 2.25 || rights->distance <= 2.25)) {
 			hlwalls->Reset();
 			hlwalls->Reset();
 			hrwalls->Reset();
@@ -459,7 +465,7 @@ private:
 			walld->Compute();
 			walls->Compute();
 			dummyLeft += ((distanceAdjust + speedAdjust) > thre ? (distanceAdjust + speedAdjust) - thre : (distanceAdjust + speedAdjust) < -thre ? (distanceAdjust + speedAdjust) + thre : 0) / 3.0;
-			//Serial.println( ((distanceAdjust + speedAdjust) > thre ? (distanceAdjust + speedAdjust) - thre : (distanceAdjust + speedAdjust) < -thre ? (distanceAdjust + speedAdjust) + thre : 0) / 3.0);
+			//Serial.println(((distanceAdjust + speedAdjust) > thre ? (distanceAdjust + speedAdjust) - thre : (distanceAdjust + speedAdjust) < -thre ? (distanceAdjust + speedAdjust) + thre : 0) / 3.0);
 		}
 		else {
 			// Serial.print(lefts->distance);

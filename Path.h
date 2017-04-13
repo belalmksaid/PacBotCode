@@ -6,7 +6,7 @@ struct item {
 public:
 	short data;
 	double length;
-	item* next;
+	item* next = NULL;
 
 	void chainDelete() {
 		if(next != NULL) {

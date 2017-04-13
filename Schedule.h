@@ -48,9 +48,9 @@ public:
 	void updateSensors() {
 		//gyro->update(timestampA, timestampF);
 		#ifdef ASENSOR
-		Serial.print(lefts->speed);
-		Serial.print("\t");
-		Serial.println(rights->speed);
+		// Serial.print(lefts->speed);
+		// Serial.print("\t");
+		// Serial.println(rights->speed);
 		#endif
 		driver->updateEncodersOnly(microA);
 		fronts->update(microA);
@@ -58,6 +58,10 @@ public:
 		rights->update(microA);
 		rightD->update(timestampA);
 		leftD->update(timestampA);
+
+		// Serial.print(driver->rightD->getState());
+		// Serial.print("\t");
+		// Serial.println(rightD->getState());
 	}
 
 	void updateSensorsOnly() {

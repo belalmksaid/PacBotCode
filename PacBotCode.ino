@@ -55,8 +55,8 @@ void setup() {
   digitalWrite(13, HIGH);   // turn the LED on (HIGH is the voltage level)
   driver.init();
   //while(!Serial) {}
-  gMap.init(14, 14, 17, 18, RIGHT);
-  gMap.pac->printd();
+  gMap.init(18, 19, 11, 12, UP);
+  randomSeed(analogRead(A0));
   //delay(5000);
   //driver.setStraight();
   //driver.setAdjustState();

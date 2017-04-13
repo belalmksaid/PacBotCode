@@ -32,8 +32,8 @@
 		}
 	}
 
-	n = 30;
-	n2 = 27;
+	n = 32;
+	n2 = 29;
 for (var i = 0; i < n; ++i) {
     html += '<tr>';
     for (var j = 0; j < n2; ++j ) {
@@ -53,9 +53,23 @@ function exp()
 		if(i % n2 == 0) {
 			arr += "{";
 		}
-		arr += $(all[i]).attr("select") == "yes" ? "0" : "1";
+		if($(all[i]).attr("select") == "yes") {
+			if($(all[i]).attr("col") == "blue") {
+				arr +=  "0";
+			}
+			else if($(all[i]).attr("col") == "black") {
+				arr +=  "8";
+			}
+		}
+		else if($(all[i]).css("background-color") == "rgb(255, 0, 0)") {
+			arr +=  "9";
+		}
+		else {
+			arr +=  "2";
+		}
+		
 		if(i % n2 == n2 - 1) {
-			arr += "},";
+			arr += "},\r\n";
 		}
 		else {
 			arr += ",";

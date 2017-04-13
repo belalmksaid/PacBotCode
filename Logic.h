@@ -4,6 +4,7 @@
 #include "Driver.h"
 #include "Map.h"
 #include "Pos.h"
+#include "PathAlgorithms.h"
 
 #define CAUTIOUS 0
 #define CHASE 1
@@ -19,21 +20,25 @@ public:
 		driver = d; 
 		pos = d->leftMotor->encoderPos1;
 		//d->setStraight();
-		d->setCCW();
+		//d->setCCW();
 	}
 
 	void update() {
 		map->update();
-		//assessOptions();
+		assessOptions();
 	}
 
 	void assessOptions() {
 		if(driver->status == TURNINGLEFT || driver->status == TURNINGRIGHT || driver->status == TURNINGBACKCW || driver->status == TURNINGBACKCCW) {
-
 			return;
 		}
 		if(!map->isLost) {
-			if(map->atDecisionPoint) {
+			if(decisionMade) {
+				driver->setStraight();
+				map->atDecisionPoint = false;
+				decisionMade = false;
+			}
+			if(map->atDecisionPoint || driver->status == SLEEP) {
 				if(map->path->n > 0) {
 					followPath();
 				}
@@ -64,6 +69,7 @@ public:
 		// else {
 		// 	driver->setCCW();
 		// }
+		decisionMade = true;
 	}
 
 	bool checkForInstaDeath() {
@@ -96,7 +102,10 @@ public:
 	void controlledWander() { // move randomly in the map, for testing only
 		if(driver->status == SLEEP || map->atDecisionPoint) { // Check if the robot is asleep moving or if the robot is at a decision point
 			map->getOptions(); // find possible options at the current block
-			r = random(0, map->noptions);
+			// map->ploc->print();
+			// Serial.println(map->noptions);
+			// Serial.println((int)map->pac->orien);
+			r = 0;//(random(map->noptions));
 			act(map->options[r]);
 		}
 
@@ -116,6 +125,7 @@ private:
 	int n;
 	bool hasPath = false;
 	char mode = CAUTIOUS;
+	bool decisionMade = false;
 };
 
 #endif

@@ -7,6 +7,12 @@
 - Blind man path following
 
 - Start map solving algorithm
-	- use A*
+	- use A* X
+	- use A* to predict ghost pos
 
-- fix one wall adjustment x
+- fix one wall adjustment
+- fix two wall adjustment overreaction
+
+- food distinction X
+
+- fill out paths covered
