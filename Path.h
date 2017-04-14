@@ -1,85 +1,91 @@
 #ifndef PATH_
 #define PATH_
 
+#include "Util.h"
 
-struct item {
-public:
-	short data;
-	double length;
-	item* next = NULL;
+#define Path Queue<short>
 
-	void chainDelete() {
-		if(next != NULL) {
-			next->chainDelete();
-			delete next;
-		}
-	}
-};
+#define item i<short>
 
-class Path {
-private:
-	item *rear, *front;
 
-public:
-	double totalLength;
-	short n;
+// struct item {
+// public:
+// 	short data;
+// 	double length;
+// 	item* next = NULL;
 
-	Path() {
-		rear = NULL;
-		front = NULL;
-		n = 0;
-		totalLength = 0.0;
-	}
+// 	void chainDelete() {
+// 		if(next != NULL) {
+// 			next->chainDelete();
+// 			delete next;
+// 		}
+// 	}
+// };
 
-	void reset() {
-		if(front != NULL) {
-			front->chainDelete();
-			delete front;
-			front = NULL;
-			delete rear;
-			rear = NULL;
+// class Path {
+// private:
+// 	item *rear, *front;
 
-		}
-	}
+// public:
+// 	double totalLength;
+// 	short n;
 
-	void push(short o, double l) {
-		n++;
-		totalLength += l;
+// 	Path() {
+// 		rear = NULL;
+// 		front = NULL;
+// 		n = 0;
+// 		totalLength = 0.0;
+// 	}
 
-		item *temp = new item;
-		temp->data = o;
-		temp->length = l;
+// 	void reset() {
+// 		if(front != NULL) {
+// 			front->chainDelete();
+// 			delete front;
+// 			front = NULL;
+// 			delete rear;
+// 			rear = NULL;
 
-		temp->next = NULL;
+// 		}
+// 	}
 
-		if(front == NULL) {
-			front = temp;
-		}
-		else {
-			rear->next = temp;
-		}
+// 	void push(short o, double l) {
+// 		n++;
+// 		totalLength += l;
 
-		rear = temp;
-	}
+// 		item *temp = new item;
+// 		temp->data = o;
+// 		temp->length = l;
 
-	short rval = 0;
+// 		temp->next = NULL;
 
-	short pop() {
-		item *temp = new item;
+// 		if(front == NULL) {
+// 			front = temp;
+// 		}
+// 		else {
+// 			rear->next = temp;
+// 		}
 
-		if(front == NULL) {
-			return -1;
-		}
-		else {
-			temp = front;
-			front = front->next;
-			totalLength -= temp->length;
-			n--;
-			rval = temp->data;
-			delete temp;
-			return rval;
-		}
-	}
-};
+// 		rear = temp;
+// 	}
+
+// 	short rval = 0;
+
+// 	short pop() {
+// 		item *temp = new item;
+
+// 		if(front == NULL) {
+// 			return -1;
+// 		}
+// 		else {
+// 			temp = front;
+// 			front = front->next;
+// 			totalLength -= temp->length;
+// 			n--;
+// 			rval = temp->data;
+// 			delete temp;
+// 			return rval;
+// 		}
+// 	}
+// };
 
 #endif

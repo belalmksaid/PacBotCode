@@ -49,7 +49,9 @@ public:
     			distance += chain[i + 1];
     			speed += speedChain[i + 1];
     		}
-			chain[CHAINSIZE - 1] = max(0, min((2335.58/(val * 5.0 - 357.47) + -.19173), ceiling)) / 5.0;
+			chain[CHAINSIZE - 1] = max(0, min((2335.58/(val * 5.0 - 357.47) + -.19173), ceiling));
+			if(chain[CHAINSIZE - 1] >= ceiling) chain[CHAINSIZE - 1] = 0;
+			else chain[CHAINSIZE - 1] /= 5.0;
 			timeChain[CHAINSIZE - 1] = (ts - timeStamp) / 1000000.0;
 			distance += chain[4];
 			speedChain[CHAINSIZE - 1] = (chain[CHAINSIZE - 1] - chain[0]) / (timeAvg);
@@ -76,7 +78,9 @@ public:
     			distance += chain[i + 1];
     			speed += speedChain[i + 1];
     		}
-			chain[CHAINSIZE - 1] = max(0, min(3611.852/(val * 5.0 - 37.49), ceiling) + -.40869) / 5.0;
+			chain[CHAINSIZE - 1] = max(0, min(3611.852/(val * 5.0 - 37.49)+ -.40869, ceiling));
+			if(chain[CHAINSIZE - 1] >= ceiling) chain[CHAINSIZE - 1] = 0;
+			else chain[CHAINSIZE - 1] /= 5.0;
 			timeChain[CHAINSIZE - 1] = (ts - timeStamp) / 1000000.0;
 			distance += chain[4];
 			speedChain[CHAINSIZE - 1] = (chain[CHAINSIZE - 1] - chain[0]) / (timeAvg);

@@ -11,8 +11,8 @@
 #define SLEEP 18
 #define ADJUSTMOTORS 22
 
-#define FORWARDSPEED 12.0
-#define TURNINGSPEED 8.0
+#define FORWARDSPEED 11
+#define TURNINGSPEED 6.0
 
 #define COOLDOWN() delay(150)
 
@@ -25,7 +25,7 @@
 
 #define BD 3.723475
 #define WD 1.5575
-#define STEPS90 BD * PI / 4.0 / (WD * PI) * CSTEPS - 19
+#define STEPS90 BD * PI / 4.0 / (WD * PI) * CSTEPS - 18
 #define STEPS180 (STEPS90) * 2.0 + 25.0
 
 #define thre 0.32
@@ -76,7 +76,7 @@ public:
 		pidturnL = new PID(&dummyLeft, &leftPWM, &desiredSpeed, .01, 25, .05, DIRECT);
 		pidturnR =  new PID(&dummyRight, &rightMasterPWM, &desiredSpeed, .01, 25, .05, DIRECT);
 		walld = new PID(&rights->distance, &distanceAdjust, &lefts->distance, .3, 0.00005, 0.1, DIRECT); //.25,2,.1
-		walls = new PID(&rights->speed, &speedAdjust, &lefts->speed, .5, 0.001, 0, DIRECT); //2,0,0.5
+		walls = new PID(&rights->speed, &speedAdjust, &lefts->speed, .5, 0.0005, 0, DIRECT); //2,0,0.5
 		hlwalld = new PID(&lefts->distance, &distanceAdjust, &ilength, 5, .00005, 0.5, DIRECT); //1,0,.2
 		hlwalls = new PID(&lefts->speed, &speedAdjust, &ispeed, .5, 0.00, 0.0, DIRECT); //1,0,0
 		hrwalld = new PID(&rights->distance, &distanceAdjust, &ilength, 5, .00005, 0.5, DIRECT); //1,0,.2
@@ -434,30 +434,40 @@ private:
 	}
 
 	void calibrate() {
-		if(lefts->distance == 0.0 && rights->distance > 0.0 && rights->distance <= 3.25) {
-			walls->Reset();
-			walld->Reset();
-			hlwalls->Reset();
-			hlwalls->Reset();
-			hrwalls->Compute();
-			hrwalld->Compute();
-			dummyLeft += ((distanceAdjust + speedAdjust) > thhre ? (distanceAdjust + speedAdjust) - thhre : (distanceAdjust + speedAdjust) < -thhre ? (distanceAdjust + speedAdjust) + thhre : 0) / 6.0;
-		// 	Serial.println(rights->distance);
-		// 	Serial.println(((distanceAdjust + speedAdjust) > thre ? (distanceAdjust + speedAdjust) - thre : (distanceAdjust + speedAdjust) < -thre ? (distanceAdjust + speedAdjust) + thre : 0) / 6.0);
-		}
-		else if(rights->distance == 0.0 && lefts->distance > 0.0 && lefts->distance <= 3.25) {
-			walls->Reset();
-			walld->Reset();
-			hrwalls->Reset();
-			hrwalls->Reset();
-			hlwalls->Compute();
-			hlwalld->Compute();
-			dummyLeft -= ((distanceAdjust + speedAdjust) > thre ? (distanceAdjust + speedAdjust) - thre : (distanceAdjust + speedAdjust) < -thre ? (distanceAdjust + speedAdjust) + thre : 0) / 6.0;
-			// Serial.println("Left");
-			// Serial.println(((distanceAdjust + speedAdjust) > thre ? (distanceAdjust + speedAdjust) - thre : (distanceAdjust + speedAdjust) < -thre ? (distanceAdjust + speedAdjust) + thre : 0) / 6.0);
-		}
-		else 
-			if(lefts->distance >= 0.5 && rights->distance >= 0.5 && (lefts->distance <= 2.25 || rights->distance <= 2.25)) {
+		// if(lefts->distance == 0.0 && rights->distance > 0.0 && rights->distance <= 3.25) {
+		// // 	walls->Reset();
+		// // 	walld->Reset();
+		// // 	hlwalls->Reset();
+		// // 	hlwalls->Reset();
+		// // 	hrwalls->Compute();
+		// // 	hrwalld->Compute();
+		// // 	dummyLeft += ((distanceAdjust + speedAdjust) > thhre ? (distanceAdjust + speedAdjust) - thhre : (distanceAdjust + speedAdjust) < -thhre ? (distanceAdjust + speedAdjust) + thhre : 0) / 6.0;
+		// // // 	Serial.println(rights->distance);
+		// // 	Serial.println(((distanceAdjust + speedAdjust) > thre ? (distanceAdjust + speedAdjust) - thre : (distanceAdjust + speedAdjust) < -thre ? (distanceAdjust + speedAdjust) + thre : 0) / 6.0);
+		// 	dummyLeft -= 0.1;
+		// 	//Serial.println("turn left");
+		// }
+		// else if(rights->distance == 0.0 && lefts->distance > 0.0 && lefts->distance <= 3.25) {
+		// 	// walls->Reset();
+		// 	// walld->Reset();
+		// 	// hrwalls->Reset();
+		// 	// hrwalls->Reset();
+		// 	// hlwalls->Compute();
+		// 	// hlwalld->Compute();
+		// 	// dummyLeft -= ((distanceAdjust + speedAdjust) > thre ? (distanceAdjust + speedAdjust) - thre : (distanceAdjust + speedAdjust) < -thre ? (distanceAdjust + speedAdjust) + thre : 0) / 6.0;
+		// 	// Serial.println("Left");
+		// 	// Serial.println(((distanceAdjust + speedAdjust) > thre ? (distanceAdjust + speedAdjust) - thre : (distanceAdjust + speedAdjust) < -thre ? (distanceAdjust + speedAdjust) + thre : 0) / 6.0);
+		// 	dummyLeft += 0.1;
+
+		// }
+		// else
+		 if(lefts->distance >= 0.5 && rights->distance >= 0.5 && (lefts->distance <= 3.25 && rights->distance <= 3.25)) {
+			// Serial.print(leftMotor->speed);
+			// Serial.print("\t");
+			// // Serial.print(lefts->speed);
+			// // Serial.print("\t");
+			// Serial.print(rightMotor->speed);
+			// Serial.println("\t");
 			hlwalls->Reset();
 			hlwalls->Reset();
 			hrwalls->Reset();
@@ -482,63 +492,6 @@ private:
 			hrwalls->Reset();
 		}
 	}
-	// long prev = 0;
-	// long prevTime = 0;
-	// bool fvall = true;
-	// int updateTime = 200000;
-	// void calibrate2(unsigned long time) {
-	// 	if(lefts->speed > 0.05) {
-	// 		if(fvall) {
-	// 			prev = leftMotor->encoderPos1;
-	// 			fvall = false;
-	// 			prevTime = time;
-	// 		}
-	// 		else {
-	// 			if(time - prevTime < updateTime) return; 
-	// 			double distance = (leftMotor->encoderPos1 - prev) / 590.0 * 1.575 * 3.141593;
-	// 			double dt = (time - prevTime)/ 1000000.0;
-	// 			prev = leftMotor->encoderPos1;
-	// 			prevTime = time;
-	// 			double at = atan2(lefts->speed, distance) * 2.0 / dt ;
-	// 			dummyLeft += at;
-	// 		}
-
-	// 	}
-	// 	if(lefts->speed < -0.05) {
-	// 		if(fvall) {
-	// 			prev = leftMotor->encoderPos1;
-	// 			fvall = false;
-	// 			prevTime = time;
-	// 		}
-	// 		else {
-	// 			if(time - prevTime < updateTime) return; 
-	// 			double distance = (leftMotor->encoderPos1 - prev) / 590.0 * 1.575 * 3.141593;
-	// 			double dt = (time - prevTime)/ 1000000.0;
-	// 			prev = leftMotor->encoderPos1;
-	// 			prevTime = time;
-	// 			double at = atan2(-1*lefts->speed, distance) * 2.0 / dt ;
-	// 			dummyLeft -= at;
-	// 		}
-
-	// 	}
-		// else if(rights->speed > 0.05) {
-		// 	if(fvall) {
-		// 		prev = rightMotor->encoderPos1;
-		// 		fvall = false;
-		// 		prevTime = time;
-		// 	}
-		// 	else {
-		// 		if(time - prevTime < 75000) return; 
-		// 		double distance = (rightMotor->encoderPos1 - prev) / 640.0 * 1.575 * 3.141593;
-		// 		double dt = (time - prevTime)/ 1000000.0;
-		// 		prev = rightMotor->encoderPos1;
-		// 		prevTime = time;
-		// 		double at = atan2(rights->speed, distance) * 2.0 / dt ;
-		// 		dummyLeft -= at;
-		// 	}
-
-		// }
-	// }
 };
 
 #endif

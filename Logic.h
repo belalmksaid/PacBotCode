@@ -19,7 +19,7 @@ public:
 		map = m;
 		driver = d; 
 		pos = d->leftMotor->encoderPos1;
-		//d->setStraight();
+		//d->setLeft();
 		//d->setCCW();
 	}
 
@@ -39,7 +39,7 @@ public:
 				decisionMade = false;
 			}
 			if(map->atDecisionPoint || driver->status == SLEEP) {
-				if(map->path->n > 0) {
+				if(map->path->size > 0) {
 					followPath();
 				}
 				else {
@@ -70,6 +70,7 @@ public:
 		// 	driver->setCCW();
 		// }
 		decisionMade = true;
+		map->grace = true;
 	}
 
 	bool checkForInstaDeath() {
@@ -103,10 +104,11 @@ public:
 		if(driver->status == SLEEP || map->atDecisionPoint) { // Check if the robot is asleep moving or if the robot is at a decision point
 			map->getOptions(); // find possible options at the current block
 			// map->ploc->print();
-			// Serial.println(map->noptions);
+			//Serial.println(map->noptions);
 			// Serial.println((int)map->pac->orien);
-			r = 0;//(random(map->noptions));
-			act(map->options[r]);
+			//r = (random(map->noptions));
+			//act(map->options[r]);
+			driver->freeze();
 		}
 
 	}

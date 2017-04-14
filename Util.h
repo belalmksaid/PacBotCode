@@ -20,12 +20,16 @@ private:
 	i<T> *rear, *front;
 
 public:
-	int size;
+	int size = 0;
 
 	Queue() {
 		rear = NULL;
 		front = NULL;
 		size = 0;
+	}
+
+	~Queue() {
+		reset();
 	}
 
 	void reset() {
@@ -62,7 +66,7 @@ public:
 		i<T> *temp = new i<T>;
 
 		if(front == NULL) {
-			return -1;
+			Serial.println("Queue is empty. Something went wrong.");
 		}
 		else {
 			temp = front;
@@ -99,6 +103,20 @@ private:
 	t<T> *it;
 
 public:
+
+	~set() {
+		reset();
+	}
+
+	void reset() {
+		if(rear != NULL) {
+			rear->chainDelete();
+			delete rear;
+			rear = NULL;
+
+		}
+	}
+	
 	short size = 0;
 	void add(T item) {
 		rear->prev = new t<T>;
@@ -106,6 +124,10 @@ public:
 		rear->prev->next = rear;
 		rear = rear->prev;
 		size++;
+
+	}
+
+	T pop() {
 
 	}
 
@@ -144,6 +166,37 @@ public:
 	t<T> *iterator() {
 		return rear;
 	}
+};
+
+template<uint32_t size> class vector
+{
+private:
+	int registers[size];
+public:
+	~vector() {
+	}
+
+	void print() {
+		for(int i = 0; i < size; i++) {
+			Serial.print(registers[i]);
+			Serial.print(" ");
+		}
+		Serial.println();
+	}
+
+	int operator [](int i) const    {return registers[i];}
+    int & operator [](int i) {return registers[i];}
+
+    bool operator ==(vector<size> a) {
+    	for(int i = 0; i < size; i++) {
+    		if(a.registers[i] != (*this).registers[i])
+    			return false;
+    	}
+    	return true;
+    }
+    bool operator !=(vector<size> a) {
+    	return !((*this) == a);
+    }
 };
 
 
