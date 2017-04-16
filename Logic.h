@@ -15,17 +15,25 @@
 class Logic {
 public:
 	long pos = 0;
+	Path* path; // the directions that the robot is following right now
+	PathAl pathAl;
 	Logic(Driver* d, Map* m) {
 		map = m;
 		driver = d; 
 		pos = d->leftMotor->encoderPos1;
+		path = new Path();
 		//d->setLeft();
 		//d->setCCW();
+		path->push(KeepForward);
+		path->push(TurnRight);
+		path->push(TurnLeft);
+		path->push(TurnLeft);
+		path->push(KeepForward);
 	}
 
 	void update() {
 		map->update();
-		assessOptions();
+		//assessOptions();
 	}
 
 	void assessOptions() {
@@ -39,7 +47,7 @@ public:
 				decisionMade = false;
 			}
 			if(map->atDecisionPoint || driver->status == SLEEP) {
-				if(map->path->size > 0) {
+				if(path->size > 0) {
 					followPath();
 				}
 				else {
@@ -66,9 +74,9 @@ public:
 		else if(n == KeepForward) {
 			driver->setStraight();
 		}
-		// else {
-		// 	driver->setCCW();
-		// }
+		else {
+			driver->setCCW();
+		}
 		decisionMade = true;
 		map->grace = true;
 	}
@@ -79,7 +87,8 @@ public:
 
 	void createPath() {
 		if(CCP) {
-			map->path->reset();
+			path->reset();
+
 		}
 		else {
 			controlledWander();
@@ -93,7 +102,7 @@ public:
 
 	void followPath() {
 		if(reaffirmPath()) {
-			act(map->path->pop());
+			act(path->pop());
 		}
 		else {
 			createPath();
@@ -106,9 +115,9 @@ public:
 			// map->ploc->print();
 			//Serial.println(map->noptions);
 			// Serial.println((int)map->pac->orien);
-			//r = (random(map->noptions));
-			//act(map->options[r]);
-			driver->freeze();
+			r = (random(map->noptions));
+			act(map->options[r]);
+			// driver->freeze();
 		}
 
 	}

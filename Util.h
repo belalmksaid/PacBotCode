@@ -103,6 +103,11 @@ private:
 	t<T> *it;
 
 public:
+	set() {
+		rear = NULL;
+		it = NULL;
+		size = 0;
+	}
 
 	~set() {
 		reset();
@@ -138,7 +143,7 @@ public:
 			if(it->data == item)
 				return true;
 			it = it->next;
-		} while(it->next != NULL);
+		} while(it != NULL);
 
 		return false;
 	}
@@ -160,7 +165,7 @@ public:
 				break;
 			}
 			it = it->next;
-		} while(it->next != NULL);
+		} while(it != NULL);
 	}
 
 	t<T> *iterator() {
@@ -173,6 +178,12 @@ template<uint32_t size> class vector
 private:
 	int registers[size];
 public:
+	vector() {
+
+	}
+	vector(int s[]) : registers(s) {
+
+	}
 	~vector() {
 	}
 
@@ -199,5 +210,133 @@ public:
     }
 };
 
+template<uint32_t size> class svector
+{
+public:
+	int registers[size];
+	svector() {
+		
+	}
+	svector(int s[]) : registers(s) {
+
+	}
+	~svector() {
+	}
+
+	void print() {
+		for(int i = 0; i < size; i++) {
+			Serial.print(registers[i]);
+			Serial.print(" ");
+		}
+		Serial.println();
+	}
+
+	int operator [](int i) const    {return registers[i];}
+    int & operator [](int i) {return registers[i];}
+
+    svector<size>& operator =(svector<size> a) {
+    	for(int i = 0; i < size; i++) {
+    		(*this).registers[i] = a.registers[i];
+    	}
+    }
+
+    bool operator ==(svector<size> a) {
+    	for(int i = 0; i < size - 1; i++) {
+    		if(a.registers[i] != (*this).registers[i])
+    			return false;
+    	}
+    	return true;
+    }
+    bool operator !=(vector<size> a) {
+    	return !((*this) == a);
+    }
+};
+
+
+template<typename T> class sset {
+private:
+	t<T> *rear;
+	t<T> *it;
+
+public:
+	sset() {
+		rear = NULL;
+		it = NULL;
+		size = 0;
+	}
+
+	~sset() {
+		reset();
+	}
+
+	void reset() {
+		if(rear != NULL) {
+			rear->chainDelete();
+			delete rear;
+			rear = NULL;
+
+		}
+	}
+	
+	short size = 0;
+	T* add(T item) {
+		if(rear != NULL) {
+			rear->prev = new t<T>;
+			rear->prev->data = item;
+			rear->prev->next = rear;
+			rear = rear->prev;
+			size++;
+		}
+		else {
+			rear = new t<T>;
+			rear->data = item;
+			size++;
+		}
+		return &(rear->data);
+
+	}
+
+	T pop() {
+
+	}
+
+	bool contains(T item, T** obj) {
+		it = rear;
+		if(it == NULL) return false;
+		do {
+			if(it->data == item) {
+				*obj = &it->data;
+				return true;
+			}
+			it = it->next;
+		} while(it != NULL);
+
+		return false;
+	}
+
+	void remove(T item) {
+		it = rear;
+		if(it == NULL) return;
+		do {
+			if(it->data == item) {
+				if(it->prev != NULL) {
+					it->prev->next = it->next;
+					
+				}
+				if(it->next != NULL) {
+					it->next->prev = it->prev;
+				}
+				delete it;
+				size--;
+				break;
+			}
+			it = it->next;
+		} while(it != NULL);
+	}
+
+	t<T> *iterator() {
+		return rear;
+	}
+};
 
 #endif

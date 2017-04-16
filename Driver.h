@@ -14,7 +14,7 @@
 #define FORWARDSPEED 11
 #define TURNINGSPEED 6.0
 
-#define COOLDOWN() delay(150)
+#define COOLDOWN() delay(150 - cutTime)
 
 
 #include "Motor.h"
@@ -52,6 +52,7 @@ public:
 	double dummyRight = 0.0, dummyLeft = 0.0;
 	double speedAdjust = 0.0, distanceAdjust = 0.0;
 	unsigned long dt = 0;
+	unsigned long cutTime = 0;
 	PID* pid; 
 	PID* walld, *walls;
 	PID* pidspeed;

@@ -32,7 +32,6 @@ public:
 		driver = d;
 		ploc = new Pos(0,0,0,0,0);
 		solMap = new SMap();
-		path = new Path();
 	}
 
 	char map[32][29] = {
@@ -80,8 +79,6 @@ public:
 	bool grace = false;
 	double dis = 0.0;
 
-	Path* path;
-
 	int remainingFood = 10;
 
 
@@ -94,13 +91,7 @@ public:
 		g1 = new Ghost(0,0,0,0, UP, BLINKY, this);
 		g2 = new Ghost(0,0,0,0, DOWN, INKY, this);
 		g3 = new Ghost(0,0,0,0, LEFT, PINKY, this);
-		g4 = new Ghost(0,0,0,0, UP, CLYDE, this);
-		path->push(KeepForward);
-		path->push(TurnRight);
-		path->push(TurnLeft);
-		path->push(TurnLeft);
-		path->push(KeepForward);
-		
+		g4 = new Ghost(0,0,0,0, UP, CLYDE, this);		
 	}
 
 
@@ -117,8 +108,8 @@ public:
 				noptions++;
 			}
 			if(map[pac->y2 + 1][pac->x1] > D && map[pac->y2 + 1][pac->x2] > D) {
-				// options[noptions] = TurnAround;
-				// noptions++;
+				options[noptions] = TurnAround;
+				noptions++;
 			}
 			if(map[pac->y1][pac->x1 - 1] > D && map[pac->x1 - 1][pac->y2] > D) {
 				options[noptions] = TurnLeft;
@@ -131,8 +122,8 @@ public:
 		}
 		else if(pac->orien == DOWN) {
 			if(map[pac->y1 - 1][pac->x1] > D && map[pac->y1 - 1][pac->x2] > D) {
-				// options[noptions] = TurnAround;
-				// noptions++;
+				options[noptions] = TurnAround;
+				noptions++;
 			}
 			if(map[pac->y2 + 1][pac->x1] > D && map[pac->y2 + 1][pac->x2] > D) {
 				options[noptions] = KeepForward;
@@ -157,8 +148,8 @@ public:
 				noptions++;
 			}
 			if(map[pac->y1][pac->x1 - 1] > D && map[pac->x1 - 1][pac->y2] > D) {
-				// options[noptions] = TurnAround;
-				// noptions++;
+				options[noptions] = TurnAround;
+				noptions++;
 			}
 			if(map[pac->y1][pac->x1 + 1] > D && map[pac->x1 + 1][pac->y2] > D) {
 				options[noptions] = KeepForward;
@@ -179,8 +170,8 @@ public:
 				noptions++;
 			}
 			if(map[pac->y1][pac->x1 + 1] > D && map[pac->x1 + 1][pac->y2] > D) {
-				//options[noptions] = TurnAround;
-				//noptions++;
+				options[noptions] = TurnAround;
+				noptions++;
 			}
 		}
 
