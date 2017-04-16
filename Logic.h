@@ -24,7 +24,8 @@ public:
 		pos = d->leftMotor->encoderPos1;
 		path = new Path();
 		//d->setLeft();
-		d->setCCW();
+		//d->setCCW();
+		d->setStraight();
 	}
 
 	void update() {

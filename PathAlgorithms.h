@@ -185,32 +185,7 @@ public:
 	}
 	short dx[4] = {0, 0, 1, -1};
 	short dy[4] = {1, -1, 0, 0};
-
-	// static int mapAStar(int x1, int y1, int x2, int y2, char **map) {
-	// 	Queue<vector<2>> q;
-	// 	vector<2> start;
-	// 	start[0] = x1;
-	// 	start[1] = y1;
-	// 	q.push(start);
-	// 	memset(dist, -1, sizeof(dist[0][0] * 32 * 29));
-	// 	dist[start[1]][start[0]] = 0;
-	// 	while(q.size != 0) {
-	// 		const vector<2> & p = q.pop();
-	// 		for(short i = 0; i < 4; i++) {
-	// 			int a = p[0] + dx[i];
-	// 			int b = p[1] + dy[i];
-	// 			if(a >= 0 && b >= 0 && a < 29 && b < 32 && dist[b][a] == -1 && map[b][a] != 0 ){
- //                    dist[a][b] = 1 + dist[p[1]][p[0]];
- //                    vector<2> n;
- //                    n[0] = b;
- //                    n[1] = a;
- //                    q.push(n);
- //                }
-	// 		} 
-	// 	}
-	// 	return 0;
-	// }
-
+	
 	vector<4> project(vector<4> pac, vector<2> dir, Map* map) {
 			vector<4> rv;
 			rv[0] = -1;
@@ -432,48 +407,7 @@ public:
 	  		}
 		}
 		return d;
-	} 
-	// static int mapBFSH(vector<4> c, vector<4> t, int l, Map* map) {
-	// 	if(c == t)
-	// 		return l;
-	// 	if(isValid(c)) {
-	// 		Serial.println(dist[c[2]][c[0]]);
-	// 		if(l < length(c)) {
-	// 			length(c) = l;
-	// 			int temp1 = 2000;
-	// 			for(int i = 0; i < 2; i++) {
-	// 				for(int j = 0; j < 2; j++) {
-	// 					vector<2> a;
-	// 					a[0] = z[i];
-	// 					a[1] = z[j];
-	// 					vector<4> nn;
-	// 					int temp2 = mapBFSH(project(c, a, map), t, l + 1, map);
-	// 					if(temp2 < temp1) {
-	// 						temp1 = temp2;
-	// 					}
-	// 				}
-	// 			}
-	// 			return temp1;
-	// 		}
-	// 		else {
-	// 			return l;
-	// 		}
-	// 	}
-	// 	else {
-	// 		return 2000;
-	// 	}
-	// }
-
-
-	// static int mapBFS(vector<4> a, vector<4> b, Map* map) {
-	// 	for(int i = 0; i < 32; i++) {
-	// 		for(int j = 0; j < 29; j++) {
-	// 			dist[i][j] = 2000;
-	// 		}
-	// 	}
-	// 	return mapBFSH(a, b, 0, map);
-	// }
-	
+	} 	
 };
 
 #endif

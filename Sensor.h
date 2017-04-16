@@ -29,6 +29,12 @@ public:
 		pinMode(pin, INPUT);
 	}
 
+	void resetChain() {
+		for(int i = 0; i < CHAINSIZE; i++) {
+			chain[i] = 0;
+		}
+	}
+
 	void update(unsigned long ts) {
 		if(type == IRD) {
 			val = digitalRead(pin);
@@ -50,8 +56,10 @@ public:
     			speed += speedChain[i + 1];
     		}
 			chain[CHAINSIZE - 1] = max(0, min((2335.58/(val * 5.0 - 357.47) + -.19173), ceiling));
-			if(chain[CHAINSIZE - 1] >= ceiling) chain[CHAINSIZE - 1] = 0;
-			else chain[CHAINSIZE - 1] /= 5.0;
+			if(chain[CHAINSIZE - 1] >= ceiling || chain[CHAINSIZE - 1] <= 0) 
+				resetChain();
+			else 
+				chain[CHAINSIZE - 1] /= 5.0;
 			timeChain[CHAINSIZE - 1] = (ts - timeStamp) / 1000000.0;
 			distance += chain[4];
 			speedChain[CHAINSIZE - 1] = (chain[CHAINSIZE - 1] - chain[0]) / (timeAvg);
@@ -79,8 +87,10 @@ public:
     			speed += speedChain[i + 1];
     		}
 			chain[CHAINSIZE - 1] = max(0, min(3611.852/(val * 5.0 - 37.49)+ -.40869, ceiling));
-			if(chain[CHAINSIZE - 1] >= ceiling) chain[CHAINSIZE - 1] = 0;
-			else chain[CHAINSIZE - 1] /= 5.0;
+			if(chain[CHAINSIZE - 1] >= ceiling || chain[CHAINSIZE - 1] <= 0) 
+				resetChain();
+			else 
+				chain[CHAINSIZE - 1] /= 5.0;
 			timeChain[CHAINSIZE - 1] = (ts - timeStamp) / 1000000.0;
 			distance += chain[4];
 			speedChain[CHAINSIZE - 1] = (chain[CHAINSIZE - 1] - chain[0]) / (timeAvg);
