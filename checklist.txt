@@ -1,8 +1,8 @@
 - Finish blind man map navigation system
 	- use all 4 side sensors instead of just digital one
 	- stop robot from going into ghost den
-	- fix ghost den blind man disruption
-	- add missing edges for bottom of the map
+	- fix ghost den blind man disruption X
+	- add missing edges for bottom of the map 
 
 - Blind man path following
 
@@ -15,4 +15,4 @@
 
 - food distinction X
 
-- fill out paths covered
+- fill out paths covered X

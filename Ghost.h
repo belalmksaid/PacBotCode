@@ -9,18 +9,21 @@
 
 #include "Pos.h"
 #include "Map.h"
+#include "Util.h"
 
 class Map;
 
 class Ghost {
 public:
+	Pos pos;
+	vector<5>* proj;
 	char color;
 	Ghost(int x1, int x2, int y1, int y2, char o, char id, Map* const m) : pos(x1, x2, y1, y2, o) {
 		color = id;
 		map = m;
 	}
 
-	Pos* projected() {
+	vector<5>* projected() {
 		return proj;
 	}
 
@@ -32,8 +35,7 @@ public:
 	}
 
 private:
-	Pos pos;
-	Pos* proj;
+
 	Map* map;
 };
 

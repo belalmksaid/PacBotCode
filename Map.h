@@ -70,7 +70,7 @@ public:
 	};
 
 	Pos* pac;
-	Ghost* g1, *g2, *g3, *g4;
+	Ghost ghosts[4] = { Ghost(0,0,0,0, UP, BLINKY, this), Ghost(0,0,0,0, DOWN, INKY, this), Ghost(0,0,0,0, LEFT, PINKY, this), Ghost(0,0,0,0, UP, CLYDE, this) };
 	Driver* driver;
 	SMap* solMap;
 	short options[4] = {5, 5, 5, 5};
@@ -88,10 +88,7 @@ public:
 
 	void init(int x1, int x2, int y1, int y2, char o) {
 		pac = new Pos(x1, x2, y1, y2, o);
-		g1 = new Ghost(0,0,0,0, UP, BLINKY, this);
-		g2 = new Ghost(0,0,0,0, DOWN, INKY, this);
-		g3 = new Ghost(0,0,0,0, LEFT, PINKY, this);
-		g4 = new Ghost(0,0,0,0, UP, CLYDE, this);		
+		// /ghosts = { new Ghost(0,0,0,0, UP, BLINKY, this), g2 = new Ghost(0,0,0,0, DOWN, INKY, this), g3 = new Ghost(0,0,0,0, LEFT, PINKY, this), g4 = new Ghost(0,0,0,0, UP, CLYDE, this) };		
 	}
 
 
@@ -175,6 +172,26 @@ public:
 			}
 		}
 
+	}
+
+	void getOptionsMod() {
+		noptions = 0;
+		if(map[pac->y1 - 1][pac->x1] > D && map[pac->y1 - 1][pac->x2] > D) {
+			options[noptions] = UP;
+			noptions++;
+		}
+		if(map[pac->y2 + 1][pac->x1] > D && map[pac->y2 + 1][pac->x2] > D) {
+			options[noptions] = DOWN;
+			noptions++;
+		}
+		if(map[pac->y1][pac->x1 - 1] > D && map[pac->x1 - 1][pac->y2] > D) {
+			options[noptions] = LEFT;
+			noptions++;
+		}
+		if(map[pac->y1][pac->x2 + 1] > D && map[pac->x2 + 1][pac->y2] > D) {
+			options[noptions] = RIGHT;
+			noptions++;
+		}
 	}
 
 	void updateOrien(char n) {

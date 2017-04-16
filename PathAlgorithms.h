@@ -266,21 +266,6 @@ public:
 
 	#define distance(a, b) (a[0] < b[0] ?  b[0] - a[1] + 1 : a[0] > b[0] ? a[1] - b[0] + 1 : a[2] > b[2] ?  a[2] - b[3] + 1 : a[2] < b[2] ? b[2] - a[3] + 1 : 0)
 
-	// int distance(vector<5> a, vector<5> b) {
-	// 	if(a[0] < b[0]) {
-	// 		return b[0] - a[1] + 1;
-	// 	}
-	// 	else if(a[0] > b[0]) {
-	// 		return a[1] - b[0] + 1;
-	// 	}
-	// 	else if(a[2] > b[2]) {
-	// 		return a[2] - b[3] + 1;
-	// 	}
-	// 	else if(a[2] < b[2]) {
-	// 		return b[2] - a[3] + 1;
-	// 	}
-	// 	return 0;
-	// }
 
 	vector<5> projectMod(vector<5> pac, vector<2> dir, Map* map, int n) {
 			vector<5> rv;
@@ -336,33 +321,95 @@ public:
 			}
 	}
 
+	vector<5> projectMod(Pos* pac, char dir, Map* map) {
+		vector<5> rv;
+		rv[0] = -1;
+		switch(dir) {
+			case RIGHT: {
+				for(short i = (*pac)[1] + 1; i < 28; i++) {
+					if(isNode((*pac)[2], i)) {
+						rv[0] = i;
+						rv[1] = i + 1;
+						rv[2] = (*pac)[2];
+						rv[3] = (*pac)[3];
+						rv[4] =  distance((*pac), rv);
+						return rv;
+					}
+				}
+
+			}
+			case LEFT: {
+				for(short i = (*pac)[0] - 1; i >= 1; i--) {
+					if(isNode((*pac)[2], i)) {
+						rv[0] = i - 1;
+						rv[1] = i;
+						rv[2] = (*pac)[2];
+						rv[3] = (*pac)[3];
+						rv[4] = distance((*pac), rv);
+						return rv;
+					}
+				}
+			}
+			case UP: 
+			{
+				for(short i = (*pac)[2] - 1; i >= 1; i--) {
+					if(isNode(i, (*pac)[0])) {
+						rv[0] = (*pac)[0];
+						rv[1] = (*pac)[1];
+						rv[2] = i - 1;
+						rv[3] = i;
+						rv[4] = distance((*pac), rv);
+						return rv;
+					}
+				}
+			}
+			case DOWN: 
+			{
+				for(short i = (*pac)[3] + 1; i < 31; i++) {
+					if(isNode(i, (*pac)[0])) {
+						rv[0] = (*pac)[0];
+						rv[1] = (*pac)[1];
+						rv[2] = i;
+						rv[3] = i + 1;
+						rv[4] = distance((*pac), rv);
+						return rv;					
+					}
+				}
+			}
+		}
+	}
+
 	short dist[32][29];
 
 	#define isTarget(a, t) (a[0] == t[0] && a[1] == t[1] && a[2] == t[2] && a[3] == t[3])
 	#define visited(n) (dist[n[2]][n[0]] != -1)
 	#define setVisited(n) dist[n[2]][n[0]] = n[4]
 	#define val(n) dist[n[2]][n[0]]
+	#define withinBB(n) (n[0] > bb[0] && n[1] < bb[1] && n[2] > bb[2] && n[3] < bb[3])
 
-	int shortestPathD(vector<4> c, vector<4> t, Map* map) {
+	int shortestPathD(vector<5> start, vector<5> t, Map* map) {
 		memset(dist, -1, sizeof(dist[0][0]) * 32 * 29);
 		Queue<vector<5>> q;
-		vector<5> start;
-		start[0] = c[0];
-		start[1] = c[1];
-		start[2] = c[2];
-		start[3] = c[3];
 		val(start) = 0;
-		// sset<svector<5>> visited;
+
+		start[4] = 0;
+
+		vector<4> bb;
+		bb[0] = min(start[0], t[0]) - 7;
+		bb[1] = max(start[1], t[1]) + 7;
+		bb[2] = min(start[2], t[2]) - 7;
+		bb[3] = max(start[3], t[3]) + 7;
+
 		q.push(start);
 		vector<2> dir;
-		int d = 1293;
+		short d = 1293;
 		while(q.size > 0) {
-			vector<5> temp = q.pop();
+			const vector<5> &temp = q.pop();
 		 	for(int i = 0; i < 4; i++) {
 		 		dir[0] = z[i];
 		 		dir[1] = z2[i];
 		 		vector<5> n = projectMod(temp, dir, map, val(temp));
-		 		if(n[0] < 0) continue;
+		 		if(n[0] < 0 || !withinBB(n)) continue;
 	 			if(!visited(n)) {
 	 				setVisited(n);
 	 				if(isTarget(n, t)) {

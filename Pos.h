@@ -86,6 +86,31 @@ public:
 		Serial.print("\t");
 		Serial.println(y);
 	}
+
+	int operator [](int i) const    {
+		switch(i) {
+			case 0:
+				return x1;
+			case 1:
+				return x2;
+			case 2:
+				return y1;
+			case 3:
+				return y2;
+		}
+	}
+    int& operator [](int i)    {
+		switch(i) {
+			case 0:
+				return x1;
+			case 1:
+				return x2;
+			case 2:
+				return y1;
+			case 3:
+				return y2;
+		}
+	}
 };
 
 
