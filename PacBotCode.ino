@@ -59,7 +59,7 @@ void setup() {
   pinMode(13, OUTPUT); 
   digitalWrite(13, HIGH);   // turn the LED on (HIGH is the voltage level)
   driver.init();
-  gMap.init(14, 14, 17, 18, RIGHT);
+  gMap.init(14, 14, 23, 24, LEFT);
   randomSeed(analogRead(A0));
   xbee.begin(9600);
   testing();
@@ -100,22 +100,10 @@ void interpret() {
   commandQ.reset();
 }
 
-int temp[32][29];
 void testing() {
   Serial.println("testing");
-   vector<5> p;
-  p[0] = 9;
-  p[1] = 10;
-  p[2] = 17;
-  p[3] = 18;
-  vector<5> d;
-  d[0] = 18;
-  d[1] = 19;
-  d[2] = 11;
-  d[3] = 12;
-  PathAl g;
   unsigned long a = micros(); 
-    g.shortestPathD(p, d, &gMap);
+    logic.simpleAI();
   a = micros()- a;
   Serial.println(a);
 }

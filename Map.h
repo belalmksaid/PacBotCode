@@ -4,7 +4,7 @@
 #include "Pos.h"
 #include "Ghost.h"
 #include "Driver.h"
-#include "SMap.h"
+//#include "SMap.h"
 #include "Path.h"
 
 #define BLOCK 0
@@ -12,10 +12,10 @@
 #define ENTRANCE 2
 #define VISITED 3
 
-#define KeepForward 1
-#define TurnRight 2
-#define TurnLeft -2
-#define TurnAround -1
+#define KeepForward 0
+#define TurnRight 1
+#define TurnLeft 3
+#define TurnAround 2
 
 #define PELLET 9
 #define PELLETNODE 8
@@ -31,7 +31,7 @@ public:
 	Map(Driver* d) {
 		driver = d;
 		ploc = new Pos(0,0,0,0,0);
-		solMap = new SMap();
+		//solMap = new SMap();
 	}
 
 	char map[32][29] = {
@@ -72,8 +72,8 @@ public:
 	Pos* pac;
 	Ghost ghosts[4] = { Ghost(0,0,0,0, UP, BLINKY, this), Ghost(0,0,0,0, DOWN, INKY, this), Ghost(0,0,0,0, LEFT, PINKY, this), Ghost(0,0,0,0, UP, CLYDE, this) };
 	Driver* driver;
-	SMap* solMap;
-	short options[4] = {5, 5, 5, 5};
+	//SMap* solMap;
+	char options[4] = {5, 5, 5, 5};
 	short noptions = 0;
 	bool isLost = false;
 	bool grace = false;
@@ -328,16 +328,16 @@ public:
 				pac->y1 = ploc->y1;
 				pac->y2 = ploc->y2;
 				pac->updatePos();
-				solMap->updateCurrentNode(pac);
+				//solMap->updateCurrentNode(pac);
 				dir = -1;
 				atDecisionPoint = true;
 				updateProjections = true;
-				dis = 0.0;
 			}
 			else if(grace) {
 				dis += abs((driver->leftMotor->distance + driver->rightMotor->distance)) * 0.5;
 				if(dis >= 7.0) {
 					grace = false;
+					dis = 0.0;
 				}
 			}
 

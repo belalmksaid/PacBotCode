@@ -34,14 +34,19 @@ public:
 	}
 
 	void assessOptions() {
-		if(driver->status == TURNINGLEFT || driver->status == TURNINGRIGHT || driver->status == TURNINGBACKCW || driver->status == TURNINGBACKCCW) {
+		if(driver->status == TURNINGLEFT || driver->status == TURNINGRIGHT || driver->status == TURNINGBACKCW || driver->status == TURNINGBACKCCW) { // if the robot is turning don't make any new decisions
+			if(path->size <= 0) {
+				driver->cutTime = millis();
+				createPath();
+				driver->cutTime = millis() - driver->cutTime + 1;
+			}
 			return;
 		}
-		if(!map->isLost) {
-			if(decisionMade) {
-				driver->setStraight();
-				map->atDecisionPoint = false;
-				decisionMade = false;
+		if(!map->isLost) { // if we're not lost in the map
+			if(decisionMade) { // we just finished a deicision
+				driver->setStraight(); // set the robot straight after the decision's been made
+				map->atDecisionPoint = false; // we're no longer at a decision point
+				decisionMade = false; // we're not making a decision anymore
 			}
 			if(map->atDecisionPoint || driver->status == SLEEP) {
 				if(path->size > 0) {
@@ -97,22 +102,58 @@ public:
 
 	vector<2> choice;
 
+	#define oppositeDirections(a, b) ((a == RIGHT && b == LEFT) || (a == LEFT && b == RIGHT) || (a == UP && b == DOWN) || (a == DOWN && b == UP))
+	#define inbetween(a, b, c) (false)
+
 	void simpleAI() {
 		if(mode == SCATTER) {
+			// path->push(KeepForward);
+			// path->push(TurnRight);
+			// path->push(TurnLeft);
+			// path->push(TurnLeft);
+			// path->push(KeepForward);
+			path->push(KeepForward);
+			path->push(KeepForward);
+			path->push(TurnLeft);
+			path->push(TurnRight);
+			path->push(KeepForward);
+			path->push(TurnLeft);
+			path->push(TurnLeft);
+			path->push(KeepForward);
+			path->push(KeepForward);
+			path->push(TurnLeft);
+			path->push(TurnLeft);
 			path->push(KeepForward);
 			path->push(TurnRight);
 			path->push(TurnLeft);
-			path->push(TurnLeft);
 			path->push(KeepForward);
+			path->push(KeepForward);
+			path->push(TurnRight);
+			path->push(TurnLeft);
+			path->push(TurnRight);
+			path->push(KeepForward);
+			path->push(TurnLeft);
+			path->push(TurnRight);
+			path->push(KeepForward);
+			path->push(TurnRight);
+			path->push(KeepForward);
+			path->push(TurnRight);
+			path->push(TurnRight);
+
 		}
 		else if(mode == CAUTIOUS) {
+			choice[0] = -283712;
+			choice[1] = -384738;
 			map->getOptionsMod();
-			for(int i = 0; i < map->noptions; i++) {
-				vector<5> proj = pathAl.projectMod(map->pac, map->options[i], map);
+			for(int j = 0; j < 4; j++) { // iterate through ghosts
+				*(map->ghosts[j].proj) = pathAl.projectMod(&map->ghosts[j].pos, map->ghosts[j].pos.orien, map);
 				int d = 12344;
-				for(int j = 0; j < 4; j++) {
-					*(map->ghosts[i].proj) = pathAl.projectMod(&map->ghosts[i].pos, map->ghosts[i].pos.orien, map);
-					d = (*map->ghosts[i].proj)[4] + pathAl.shortestPathD(*(map->ghosts[i].proj), proj, map) + proj[4];
+				for(int i = 0; i < map->noptions; i++){
+					vector<5> proj = pathAl.projectMod(map->pac, map->options[i], map);
+					if(oppositeDirections(map->options[i], map->ghosts[j].pos.orien) && inbetween(map->ghosts[j].pos, map->pac, proj)) {
+						return;
+					}
+					d = (*map->ghosts[j].proj)[4] + pathAl.shortestPathD(*(map->ghosts[j].proj), proj, map) + proj[4];
 					d *= 10;
 					d -= 590;
 					if(d > choice[1]) {
@@ -121,13 +162,29 @@ public:
 					}
 				}
 			}
-
 			enforceChoice(map->options[choice[0]]);	
+		}
+		else if(mode == CHASE) {
+
 		}
 	}
 
-	void enforceChoice(char c) {
-
+	void enforceChoice(char c) { // make the robot do the action picked
+		if(c == map->pac->orien) {
+			act(KeepForward);
+		}
+		else if(c - map->pac->orien == 1) {
+			act(TurnRight);
+		}
+		else if(map->pac->orien - c == 1 || (map->pac->orien == UP && c == LEFT)) {
+			act(TurnLeft);
+		}
+		else if(c - map->pac->orien == 2 || map->pac->orien - c == 2) {
+			act(TurnAround);
+		}
+		else {
+			//Serial.println("ERROR TURNING");
+		}
 	}
 
 	int scoreChoice(vector<5> *c) {
@@ -148,10 +205,8 @@ public:
 	}
 	int r = 0;
 	void controlledWander() { // avoids ghosts only, doesn't care about food doesn't plan very far ahead
-		if(driver->status == SLEEP || map->atDecisionPoint) { // Check if the robot is asleep moving or if the robot is at a decision point
+	 // Check if the robot is asleep moving or if the robot is at a decision point
 			simpleAI();
-		}
-
 	}
 
 	void emergencyControl() {

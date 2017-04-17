@@ -4,129 +4,46 @@
 #include "Path.h"
 #include "Pos.h"
 #include "Map.h"
-#include "SMap.h"
+//#include "SMap.h"
 #include "Util.h"
 
 
 
 #define isInRange(i, j) (i > 0 && j > 0 && i < 29 && j < 32)
 #define isValid(a) (a[0] > 0 && a[2] > 0 && a[1] < 28 && a[3] < 31)
-#define isNode(j, i) (map->map[j][i] == 6 || map->map[j][i] == 8)
+
 #define length(v)  dist[v[2]][v[0]]
 
 
 class PathAl {
 public:
 
-	double estimateDistance(Node* a, Node *b) {
-		return (3.5 * (abs(a->x2 - a->x1) + 1) + 3.5 * (abs(a->y2 - a->y1) + 1) / 7.0);
-	}
+	// Path* getPath(set<Node*>* star, char o) {
+	// 	Path* rv = new Path;
+	// 	t<Node*> *it = star->iterator();
+	// 	t<Node*> *next = it->next;
+	// 	char prev = o;
 
-	set<Node*>* nodeAStar(Node* start, Node* goal, SMap* m) {
-		set<Node*> open;
-		set<Node*> closed;
-
-		start->g = 0;
-		start->h = estimateDistance(start, goal);
-		start->f = start->h;
-
-		start->parent = NULL;
-
-		open.add(start);
-
-		short i = 0;
-
-		Node* current = NULL;
-
-		while(true) {
-			current = NULL;
-
-			if(open.size == 0) {
-				Serial.println("No route.");
-			}
-
-			t<Node*> *iter = open.iterator();
-			do {
-				if(current == NULL || iter->data->f < current->f) {
-					current = iter->data;
-				}
-			} while(iter->next != NULL);
-
-			if(current == goal)
-				break;
-
-			open.remove(current);
-			closed.add(current);
-
-			for(i = 0; i < current->n; i++) {
-				if(current->edges[i]->n > 1) {
-					Node* neighbor = NULL;
-					if(current->edges[i]->nodes[0] != current) {
-						neighbor = current->edges[i]->nodes[0];
-					}
-					else {
-						neighbor = current->edges[i]->nodes[1];
-					}
-
-					double nextG = current->g + current->edges[i]->length;
-
-					if(nextG < neighbor->g) {
-						open.remove(neighbor);
-						closed.remove(neighbor);
-					}
-
-					if(!open.contains(neighbor) && !closed.contains(neighbor)) {
-						neighbor->g = nextG;
-						neighbor->h = estimateDistance(neighbor, goal);
-						neighbor->f = neighbor->g + neighbor->h;
-						neighbor->parent = current;
-						open.add(neighbor);
-					}
-				}
-			}
-		}
-
-		set<Node*>* rpath = new set<Node*>;
-
-		current = goal;
-
-		do {
-			rpath->add(current);
-			current = current->parent;
-		}	while(current->parent != NULL);
-
-		return rpath;
-	}
-
-	set<Node*>* nodeAStar(Pos* a, Pos* b, SMap* m) {
-		return nodeAStar(m->getNode(a), m->getNode(b), m);
-	}
-
-	Path* getPath(set<Node*>* star, char o) {
-		Path* rv = new Path;
-		t<Node*> *it = star->iterator();
-		t<Node*> *next = it->next;
-		char prev = o;
-
-		do {
-			if(it->data->x2 < next->data->x1) {
-				prev = setRight(prev);
-				rv->push(prev);
-			}
-			else if(it->data->x1 > next->data->x2) {
-				prev = setLeft(prev);
-				rv->push(prev);
-			}
-			else if(next->data->y1 > it->data->y2) {
-				prev = setUp(prev);
-				rv->push(prev);
-			}
-			else if(next->data->y2 < it->data->y1) {
-				prev = setDown(prev);
-				rv->push(prev);
-			}
-		} while(it->next != NULL);
-	}
+	// 	do {
+	// 		if(it->data->x2 < next->data->x1) {
+	// 			prev = setRight(prev);
+	// 			rv->push(prev);
+	// 		}
+	// 		else if(it->data->x1 > next->data->x2) {
+	// 			prev = setLeft(prev);
+	// 			rv->push(prev);
+	// 		}
+	// 		else if(next->data->y1 > it->data->y2) {
+	// 			prev = setUp(prev);
+	// 			rv->push(prev);
+	// 		}
+	// 		else if(next->data->y2 < it->data->y1) {
+	// 			prev = setDown(prev);
+	// 			rv->push(prev);
+	// 		}
+	// 	} while(it->next != NULL);
+	// 	return rv;
+	// }
 
 	char setLeft(char o) {
 		if(o == UP) {
@@ -185,7 +102,11 @@ public:
 	}
 	short dx[4] = {0, 0, 1, -1};
 	short dy[4] = {1, -1, 0, 0};
-	
+
+	#define distance(a, b) (a[0] < b[0] ?  b[0] - a[1] + 1 : a[0] > b[0] ? a[1] - b[0] + 1 : a[2] > b[2] ?  a[2] - b[3] + 1 : a[2] < b[2] ? b[2] - a[3] + 1 : 0)
+	#define isNode(j, i) (map->map[j][i] == 6 || map->map[j][i] == 8)
+	#define isFood(j, i) (map->map[j][i] == 8 || map->map[j][i] == 9)
+
 	vector<4> project(vector<4> pac, vector<2> dir, Map* map) {
 			vector<4> rv;
 			rv[0] = -1;
@@ -239,7 +160,6 @@ public:
 	int z[4] = {1, -1, 0, 0};
 	int z2[4] = {0, 0, -1, 1};
 
-	#define distance(a, b) (a[0] < b[0] ?  b[0] - a[1] + 1 : a[0] > b[0] ? a[1] - b[0] + 1 : a[2] > b[2] ?  a[2] - b[3] + 1 : a[2] < b[2] ? b[2] - a[3] + 1 : 0)
 
 
 	vector<5> projectMod(vector<5> pac, vector<2> dir, Map* map, int n) {
@@ -293,21 +213,23 @@ public:
 						return rv;					
 					}
 				}
-			}
+			} // find the next node in this direction, returns the node and distance
 	}
 
 	vector<5> projectMod(Pos* pac, char dir, Map* map) {
 		vector<5> rv;
 		rv[0] = -1;
+		rv[4] = 2;
 		switch(dir) {
 			case RIGHT: {
 				for(short i = (*pac)[1] + 1; i < 28; i++) {
+					rv[4] += 1;
 					if(isNode((*pac)[2], i)) {
 						rv[0] = i;
 						rv[1] = i + 1;
 						rv[2] = (*pac)[2];
 						rv[3] = (*pac)[3];
-						rv[4] =  distance((*pac), rv);
+						//rv[4] =  distance((*pac), rv);
 						return rv;
 					}
 				}
@@ -315,12 +237,13 @@ public:
 			}
 			case LEFT: {
 				for(short i = (*pac)[0] - 1; i >= 1; i--) {
+					rv[4] += 1;
 					if(isNode((*pac)[2], i)) {
 						rv[0] = i - 1;
 						rv[1] = i;
 						rv[2] = (*pac)[2];
 						rv[3] = (*pac)[3];
-						rv[4] = distance((*pac), rv);
+						//rv[4] = distance((*pac), rv);
 						return rv;
 					}
 				}
@@ -328,12 +251,13 @@ public:
 			case UP: 
 			{
 				for(short i = (*pac)[2] - 1; i >= 1; i--) {
+					rv[4] += 1;
 					if(isNode(i, (*pac)[0])) {
 						rv[0] = (*pac)[0];
 						rv[1] = (*pac)[1];
 						rv[2] = i - 1;
 						rv[3] = i;
-						rv[4] = distance((*pac), rv);
+						//rv[4] = distance((*pac), rv);
 						return rv;
 					}
 				}
@@ -341,12 +265,149 @@ public:
 			case DOWN: 
 			{
 				for(short i = (*pac)[3] + 1; i < 31; i++) {
+					rv[4] += 1;
 					if(isNode(i, (*pac)[0])) {
 						rv[0] = (*pac)[0];
 						rv[1] = (*pac)[1];
 						rv[2] = i;
 						rv[3] = i + 1;
-						rv[4] = distance((*pac), rv);
+						//rv[4] = distance((*pac), rv);
+						return rv;					
+					}
+				}
+			}
+		} // find the next node in the given direction, returns the node and distance
+	}
+
+	vector<6> projectModFood(Pos* pac, char dir, Map* map, int n, int f) { // find the next node in the given direction, returns the node and distance and that value of the food in those nodes
+		vector<6> rv;
+		rv[0] = -1;
+		rv[4] = 2 + n;
+		rv[5] = f;
+		switch(dir) {
+			case RIGHT: {
+				for(short i = (*pac)[1] + 1; i < 28; i++) {
+					rv[4] += 1;
+					rv[5] += isFood((*pac)[2], i) ? 1 : 0; 
+					if(isNode((*pac)[2], i)) {
+						rv[0] = i;
+						rv[1] = i + 1;
+						rv[2] = (*pac)[2];
+						rv[3] = (*pac)[3];
+						//rv[4] =  distance((*pac), rv);
+						return rv;
+					}
+				}
+
+			}
+			case LEFT: {
+				for(short i = (*pac)[0] - 1; i >= 1; i--) {
+					rv[4] += 1;
+					rv[5] += isFood((*pac)[2], i) ? 1 : 0; 
+					if(isNode((*pac)[2], i)) {
+						rv[0] = i - 1;
+						rv[1] = i;
+						rv[2] = (*pac)[2];
+						rv[3] = (*pac)[3];
+						//rv[4] = distance((*pac), rv);
+						return rv;
+					}
+				}
+			}
+			case UP: 
+			{
+				for(short i = (*pac)[2] - 1; i >= 1; i--) {
+					rv[4] += 1;
+					rv[5] += isFood(i, (*pac)[0]) ? 1 : 0; 
+					if(isNode(i, (*pac)[0])) {
+						rv[0] = (*pac)[0];
+						rv[1] = (*pac)[1];
+						rv[2] = i - 1;
+						rv[3] = i;
+						//rv[4] = distance((*pac), rv);
+						return rv;
+					}
+				}
+			}
+			case DOWN: 
+			{
+				for(short i = (*pac)[3] + 1; i < 31; i++) {
+					rv[4] += 1;
+					rv[5] += isFood(i, (*pac)[0]) ? 1 : 0; 
+					if(isNode(i, (*pac)[0])) {
+						rv[0] = (*pac)[0];
+						rv[1] = (*pac)[1];
+						rv[2] = i;
+						rv[3] = i + 1;
+						//rv[4] = distance((*pac), rv);
+						return rv;					
+					}
+				}
+			}
+		}
+	}
+
+	vector<6> projectModFood(vector<6> pac, char dir, Map* map, int n, int f) { // find the next node in the given direction, returns the node and distance and that value of the food in those nodes
+		vector<6> rv;
+		rv[0] = -1;
+		rv[4] = 2 + n;
+		rv[5] = f;
+		switch(dir) {
+			case RIGHT: {
+				for(short i = pac[1] + 1; i < 28; i++) {
+					rv[4] += 1;
+					rv[5] += isFood(pac[2], i) ? 1 : 0; 
+					if(isNode(pac[2], i)) {
+						rv[0] = i;
+						rv[1] = i + 1;
+						rv[2] = (pac)[2];
+						rv[3] = (pac)[3];
+						//rv[4] =  distance(pac, rv);
+						return rv;
+					}
+				}
+
+			}
+			case LEFT: {
+				for(short i = pac[0] - 1; i >= 1; i--) {
+					rv[4] += 1;
+					rv[5] += isFood((pac)[2], i) ? 1 : 0; 
+					if(isNode(pac[2], i)) {
+						rv[0] = i - 1;
+						rv[1] = i;
+						rv[2] = pac[2];
+						rv[3] = pac[3];
+						//rv[4] = distance(pac, rv);
+						return rv;
+					}
+				}
+			}
+			case UP: 
+			{
+				for(short i = (pac)[2] - 1; i >= 1; i--) {
+					rv[4] += 1;
+					rv[5] += isFood(i, (pac)[0]) ? 1 : 0; 
+					if(isNode(i, pac[0])) {
+						rv[0] = pac[0];
+						rv[1] = pac[1];
+						rv[2] = i - 1;
+						rv[3] = i;
+						//rv[4] = distance(pac, rv);
+						return rv;
+					}
+				}
+			}
+			case DOWN: 
+			{
+				for(short i = (pac)[3] + 1; i < 31; i++) {
+					rv[4] += 1;
+					rv[5] += isFood(i, (pac)[0]) ? 1 : 0; 
+					if(isNode(i, (pac)[0])) {
+						rv[0] = (pac)[0];
+						rv[1] = (pac)[1];
+						rv[2] = i;
+						rv[3] = i + 1;
+						//rv[4] = distance(pac, rv);
 						return rv;					
 					}
 				}
@@ -360,6 +421,7 @@ public:
 	#define visited(n) (dist[n[2]][n[0]] != -1)
 	#define setVisited(n) dist[n[2]][n[0]] = n[4]
 	#define val(n) dist[n[2]][n[0]]
+	#define valAd(n) dist[n[2]][n[1]]
 	#define withinBB(n) (n[0] > bb[0] && n[1] < bb[1] && n[2] > bb[2] && n[3] < bb[3])
 
 	int shortestPathD(vector<5> start, vector<5> t, Map* map) {
@@ -407,7 +469,57 @@ public:
 	  		}
 		}
 		return d;
-	} 	
+	}
+
+	char dirs[4] = { UP,  RIGHT, LEFT, DOWN };
+	vector<2> shortestPathDWithFood(vector<6> start, vector<6> t, Map* map) {
+		memset(dist, -1, sizeof(dist[0][0]) * 32 * 29);
+		Queue<vector<6>> q;
+		val(start) = 0;
+
+		start[4] = 0;
+
+		vector<4> bb;
+		bb[0] = min(start[0], t[0]) - 7;
+		bb[1] = max(start[1], t[1]) + 7;
+		bb[2] = min(start[2], t[2]) - 7;
+		bb[3] = max(start[3], t[3]) + 7;
+
+		vector<2> r;
+
+		q.push(start);
+		short d = 1293;
+		while(q.size > 0) {
+			const vector<6> &temp = q.pop();
+		 	for(int i = 0; i < 4; i++) {
+		 		vector<6> n = projectModFood(temp, dirs[i], map, val(temp), valAd(temp));
+		 		if(n[0] < 0 || !withinBB(n)) continue;
+	 			if(!visited(n)) {
+	 				setVisited(n);
+	 				if(isTarget(n, t)) {
+	 					d = n[4];
+	 					r[1] = n[5];
+	 				}
+	 				else {
+	 					q.push(n);
+	 				}
+	 			}
+	 			else {
+	 				if(n[4] < val(n)) {
+	 					val(n) = n[4];
+	 					valAd(n) = n[5];
+	 					q.push(n);
+	 				}
+	 				if(isTarget(n, t)) {
+	 					d = val(n);
+	 					r[1] = valAd(n);
+	 				}
+	 			}
+	  		}
+		}
+		r[0] = d;
+		return r;
+	} 	 	
 };
 
 #endif

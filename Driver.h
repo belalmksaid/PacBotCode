@@ -14,7 +14,8 @@
 #define FORWARDSPEED 11
 #define TURNINGSPEED 6.0
 
-#define COOLDOWN() delay(150 - cutTime)
+#define COOLDOWN() delay(150 - cutTime); \
+				   cutTime = 0\
 
 
 #include "Motor.h"
@@ -416,7 +417,6 @@ private:
 	}
 
 	void moveForward() {
-		//calibrate2(dt);
 		leftMotor->setDirection(ANTICLOCKWISE);
 		rightMotor->setDirection(CLOCKWISE);
 		leftMotor->setValue((int)leftPWM);
