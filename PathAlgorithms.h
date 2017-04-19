@@ -103,9 +103,10 @@ public:
 	short dx[4] = {0, 0, 1, -1};
 	short dy[4] = {1, -1, 0, 0};
 
-	#define distance(a, b) (a[0] < b[0] ?  b[0] - a[1] + 1 : a[0] > b[0] ? a[1] - b[0] + 1 : a[2] > b[2] ?  a[2] - b[3] + 1 : a[2] < b[2] ? b[2] - a[3] + 1 : 0)
+	#define distance(a, b) (a[0] < b[0] ?  b[0] - a[1] : a[0] > b[0] ? a[1] - b[0]: a[2] > b[2] ?  a[2] - b[3] : a[2] < b[2] ? b[2] - a[3]: 0)
 	#define isNode(j, i) (map->map[j][i] == 6 || map->map[j][i] == 8)
 	#define isFood(j, i) (map->map[j][i] == 8 || map->map[j][i] == 9)
+	#define isWall(j, i) (map->map[j][i] == 0)
 
 	vector<4> project(vector<4> pac, vector<2> dir, Map* map) {
 			vector<4> rv;
@@ -119,6 +120,9 @@ public:
 						rv[3] = pac[3];
 						return rv;
 					}
+					else if(isWall(pac[2], i)) {
+						break;
+					}
 				}
 
 			}
@@ -131,6 +135,9 @@ public:
 						rv[3] = pac[3];
 						return rv;
 					}
+					else if(isWall(pac[2], i)) {
+						break;
+					}
 				}
 			}
 			else if(dir[1] == -1) {
@@ -142,6 +149,9 @@ public:
 						rv[3] = i;
 						return rv;
 					}
+					else if(isWall(i, pac[0])) {
+						break;
+					}
 				}
 			}
 			else {
@@ -152,6 +162,9 @@ public:
 						rv[2] = i;
 						rv[3] = i + 1;
 						return rv;					
+					}
+					else if(isWall(i, pac[0])) {
+						break;
 					}
 				}
 			}
@@ -162,18 +175,21 @@ public:
 
 
 
-	vector<5> projectMod(vector<5> pac, vector<2> dir, Map* map, int n) {
-			vector<5> rv;
-			rv[0] = -1;
+	void projectMod(vector<5> pac, vector<2> dir, Map* map, int n, vector<5>* rv) {
+			(*rv)[0] = -1;
 			if(dir[0] == 1) {
 				for(short i = pac[1] + 1; i < 28; i++) {
 					if(isNode(pac[2], i)) {
-						rv[0] = i;
-						rv[1] = i + 1;
-						rv[2] = pac[2];
-						rv[3] = pac[3];
-						rv[4] = n + distance(pac, rv);
-						return rv;
+						(*rv)[0] = i;
+						(*rv)[1] = i + 1;
+						(*rv)[2] = pac[2];
+						(*rv)[3] = pac[3];
+						(*rv)[4] = n + distance(pac, (*rv));
+						break;
+						//return (*rv);
+					}
+					else if(isWall(pac[2], i)) {
+						break;
 					}
 				}
 
@@ -181,98 +197,124 @@ public:
 			else if(dir[0] == -1) {
 				for(short i = pac[0] - 1; i >= 1; i--) {
 					if(isNode(pac[2], i)) {
-						rv[0] = i - 1;
-						rv[1] = i;
-						rv[2] = pac[2];
-						rv[3] = pac[3];
-						rv[4] = n + distance(pac, rv);
-						return rv;
+						(*rv)[0] = i - 1;
+						(*rv)[1] = i;
+						(*rv)[2] = pac[2];
+						(*rv)[3] = pac[3];
+						(*rv)[4] = n + distance(pac, (*rv));
+						break;
+						//return (*rv);
+					}
+					else if(isWall(pac[2], i)) {
+						break;
 					}
 				}
 			}
 			else if(dir[1] == -1) {
 				for(short i = pac[2] - 1; i >= 1; i--) {
 					if(isNode(i, pac[0])) {
-						rv[0] = pac[0];
-						rv[1] = pac[1];
-						rv[2] = i - 1;
-						rv[3] = i;
-						rv[4] = n + distance(pac, rv);
-						return rv;
+						(*rv)[0] = pac[0];
+						(*rv)[1] = pac[1];
+						(*rv)[2] = i - 1;
+						(*rv)[3] = i;
+						(*rv)[4] = n + distance(pac, (*rv));
+						break;
+						//return (*rv);
+					}
+					else if(isWall(i, pac[0])) {
+						break;
 					}
 				}
 			}
 			else {
 				for(short i = pac[3] + 1; i < 31; i++) {
 					if(isNode(i, pac[0])) {
-						rv[0] = pac[0];
-						rv[1] = pac[1];
-						rv[2] = i;
-						rv[3] = i + 1;
-						rv[4] = n + distance(pac, rv);
-						return rv;					
+						(*rv)[0] = pac[0];
+						(*rv)[1] = pac[1];
+						(*rv)[2] = i;
+						(*rv)[3] = i + 1;
+						(*rv)[4] = n + distance(pac, (*rv));
+						break;			
+					}
+					else if(isWall(i, pac[0])) {
+						break;
 					}
 				}
 			} // find the next node in this direction, returns the node and distance
 	}
 
-	vector<5> projectMod(Pos* pac, char dir, Map* map) {
-		vector<5> rv;
-		rv[0] = -1;
-		rv[4] = 2;
+	void projectMod(Pos* pac, char dir, Map* map, vector<5>* rv) {
+		(*rv)[0] = -1;
+		(*rv)[4] = 2;
 		switch(dir) {
 			case RIGHT: {
 				for(short i = (*pac)[1] + 1; i < 28; i++) {
-					rv[4] += 1;
+					(*rv)[4] += 1;
 					if(isNode((*pac)[2], i)) {
-						rv[0] = i;
-						rv[1] = i + 1;
-						rv[2] = (*pac)[2];
-						rv[3] = (*pac)[3];
-						//rv[4] =  distance((*pac), rv);
-						return rv;
+						(*rv)[0] = i;
+						(*rv)[1] = i + 1;
+						(*rv)[2] = (*pac)[2];
+						(*rv)[3] = (*pac)[3];
+						//(*rv)[4] =  distance((*pac), (*rv));
+						//return (*rv);
+						break;
+					}
+					else if(isWall((*pac)[2], i)) {
+						break;
 					}
 				}
 
 			}
 			case LEFT: {
 				for(short i = (*pac)[0] - 1; i >= 1; i--) {
-					rv[4] += 1;
+					(*rv)[4] += 1;
 					if(isNode((*pac)[2], i)) {
-						rv[0] = i - 1;
-						rv[1] = i;
-						rv[2] = (*pac)[2];
-						rv[3] = (*pac)[3];
-						//rv[4] = distance((*pac), rv);
-						return rv;
+						(*rv)[0] = i - 1;
+						(*rv)[1] = i;
+						(*rv)[2] = (*pac)[2];
+						(*rv)[3] = (*pac)[3];
+						//(*rv)[4] = distance((*pac), (*rv));
+						//return (*rv);
+						break;
+					}
+					else if(isWall((*pac)[2], i)) {
+						break;
 					}
 				}
 			}
 			case UP: 
 			{
 				for(short i = (*pac)[2] - 1; i >= 1; i--) {
-					rv[4] += 1;
+					(*rv)[4] += 1;
 					if(isNode(i, (*pac)[0])) {
-						rv[0] = (*pac)[0];
-						rv[1] = (*pac)[1];
-						rv[2] = i - 1;
-						rv[3] = i;
-						//rv[4] = distance((*pac), rv);
-						return rv;
+						(*rv)[0] = (*pac)[0];
+						(*rv)[1] = (*pac)[1];
+						(*rv)[2] = i - 1;
+						(*rv)[3] = i;
+						//(*rv)[4] = distance((*pac), (*rv));
+						//return (*rv);
+						break;
+					}
+					else if(isWall(i, (*pac)[0])) {
+						break;
 					}
 				}
 			}
 			case DOWN: 
 			{
 				for(short i = (*pac)[3] + 1; i < 31; i++) {
-					rv[4] += 1;
+					(*rv)[4] += 1;
 					if(isNode(i, (*pac)[0])) {
-						rv[0] = (*pac)[0];
-						rv[1] = (*pac)[1];
-						rv[2] = i;
-						rv[3] = i + 1;
-						//rv[4] = distance((*pac), rv);
-						return rv;					
+						(*rv)[0] = (*pac)[0];
+						(*rv)[1] = (*pac)[1];
+						(*rv)[2] = i;
+						(*rv)[3] = i + 1;
+						//(*rv)[4] = distance((*pac), (*rv));
+						//return (*rv);		
+						break;			
+					}
+					else if(isWall(i, (*pac)[0])) {
+						break;
 					}
 				}
 			}
@@ -297,6 +339,9 @@ public:
 						//rv[4] =  distance((*pac), rv);
 						return rv;
 					}
+					else if(isWall((*pac)[2], i)) {
+						break;
+					}
 				}
 
 			}
@@ -311,6 +356,9 @@ public:
 						rv[3] = (*pac)[3];
 						//rv[4] = distance((*pac), rv);
 						return rv;
+					}
+					else if(isWall((*pac)[2], i)) {
+						break;
 					}
 				}
 			}
@@ -327,6 +375,9 @@ public:
 						//rv[4] = distance((*pac), rv);
 						return rv;
 					}
+					else if(isWall(i, (*pac)[0])) {
+						break;
+					}
 				}
 			}
 			case DOWN: 
@@ -341,6 +392,9 @@ public:
 						rv[3] = i + 1;
 						//rv[4] = distance((*pac), rv);
 						return rv;					
+					}
+					else if(isWall(i, (*pac)[0])) {
+						break;
 					}
 				}
 			}
@@ -365,6 +419,9 @@ public:
 						//rv[4] =  distance(pac, rv);
 						return rv;
 					}
+					else if(isWall(pac[2], i)) {
+						break;
+					}
 				}
 
 			}
@@ -379,6 +436,9 @@ public:
 						rv[3] = pac[3];
 						//rv[4] = distance(pac, rv);
 						return rv;
+					}
+					else if(isWall(pac[2], i)) {
+						break;
 					}
 				}
 			}
@@ -395,6 +455,9 @@ public:
 						//rv[4] = distance(pac, rv);
 						return rv;
 					}
+					else if(isWall(i, pac[0])) {
+						break;
+					}
 				}
 			}
 			case DOWN: 
@@ -409,6 +472,9 @@ public:
 						rv[3] = i + 1;
 						//rv[4] = distance(pac, rv);
 						return rv;					
+					}
+					else if(isWall(i, pac[0])) {
+						break;
 					}
 				}
 			}
@@ -440,12 +506,13 @@ public:
 		q.push(start);
 		vector<2> dir;
 		short d = 1293;
+		vector<5> n;
 		while(q.size > 0) {
 			const vector<5> &temp = q.pop();
 		 	for(int i = 0; i < 4; i++) {
 		 		dir[0] = z[i];
 		 		dir[1] = z2[i];
-		 		vector<5> n = projectMod(temp, dir, map, val(temp));
+		 		projectMod(temp, dir, map, val(temp), &n);
 		 		if(n[0] < 0 || !withinBB(n)) continue;
 	 			if(!visited(n)) {
 	 				setVisited(n);
@@ -468,6 +535,13 @@ public:
 	 			}
 	  		}
 		}
+		// for(int x = 0; x < 32; x++) {
+		// 	for(int y = 0; y < 29; y++) {
+		// 		Serial.print(dist[x][y]);
+		// 		Serial.print(" ");
+		// 	}
+		// 	Serial.println();
+		// }
 		return d;
 	}
 
@@ -505,7 +579,7 @@ public:
 	 				}
 	 			}
 	 			else {
-	 				if(n[4] < val(n)) {
+  	 				if(n[4] < val(n)) {
 	 					val(n) = n[4];
 	 					valAd(n) = n[5];
 	 					q.push(n);

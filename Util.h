@@ -176,9 +176,8 @@ public:
 template<uint32_t size> 
 class vector
 {
-private:
-	int registers[size];
 public:
+	int registers[size];
 	vector() {
 
 	}

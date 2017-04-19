@@ -108,11 +108,11 @@ public:
 				options[noptions] = TurnAround;
 				noptions++;
 			}
-			if(map[pac->y1][pac->x1 - 1] > D && map[pac->x1 - 1][pac->y2] > D) {
+			if(map[pac->y1][pac->x1 - 1] > D && map[pac->y2][pac->x1 - 1] > D) {
 				options[noptions] = TurnLeft;
 				noptions++;
 			}
-			if(map[pac->y1][pac->x2 + 1] > D && map[pac->x2 + 1][pac->y2] > D) {
+			if(map[pac->y1][pac->x2 + 1] > D && map[pac->y2][pac->x2 + 1] > D) {
 				options[noptions] = TurnRight;
 				noptions++;
 			}
@@ -126,11 +126,11 @@ public:
 				options[noptions] = KeepForward;
 				noptions++;
 			}
-			if(map[pac->y1][pac->x1 - 1] > D && map[pac->x1 - 1][pac->y2] > D) {
+			if(map[pac->y1][pac->x1 - 1] > D && map[pac->y2][pac->x1 - 1] > D) {
 				options[noptions] = TurnRight;
 				noptions++;
 			}
-			if(map[pac->y1][pac->x1 + 1] > D && map[pac->x1 + 1][pac->y2] > D) {
+			if(map[pac->y1][pac->x1 + 1] > D && map[pac->y2][pac->x1 + 1] > D) {
 				options[noptions] = TurnLeft;
 				noptions++;
 			}
@@ -144,11 +144,11 @@ public:
 				options[noptions] = TurnRight;
 				noptions++;
 			}
-			if(map[pac->y1][pac->x1 - 1] > D && map[pac->x1 - 1][pac->y2] > D) {
+			if(map[pac->y1][pac->x1 - 1] > D && map[pac->y2][pac->x1 - 1] > D) {
 				options[noptions] = TurnAround;
 				noptions++;
 			}
-			if(map[pac->y1][pac->x1 + 1] > D && map[pac->x1 + 1][pac->y2] > D) {
+			if(map[pac->y1][pac->x1 + 1] > D && map[pac->y2][pac->x1 + 1] > D) {
 				options[noptions] = KeepForward;
 				noptions++;
 			}
@@ -162,11 +162,11 @@ public:
 				options[noptions] = TurnLeft;
 				noptions++;
 			}
-			if(map[pac->y1][pac->x1 - 1] > D && map[pac->x1 - 1][pac->y2] > D) {
+			if(map[pac->y1][pac->x1 - 1] > D && map[pac->y2][pac->x1 - 1] > D) {
 				options[noptions] = KeepForward;
 				noptions++;
 			}
-			if(map[pac->y1][pac->x1 + 1] > D && map[pac->x1 + 1][pac->y2] > D) {
+			if(map[pac->y1][pac->x1 + 1] > D && map[pac->y2][pac->x1 + 1] > D) {
 				options[noptions] = TurnAround;
 				noptions++;
 			}
@@ -184,11 +184,11 @@ public:
 			options[noptions] = DOWN;
 			noptions++;
 		}
-		if(map[pac->y1][pac->x1 - 1] > D && map[pac->x1 - 1][pac->y2] > D) {
+		if(map[pac->y1][pac->x1 - 1] > D && map[pac->y2][pac->x1 - 1] > D) {
 			options[noptions] = LEFT;
 			noptions++;
 		}
-		if(map[pac->y1][pac->x2 + 1] > D && map[pac->x2 + 1][pac->y2] > D) {
+		if(map[pac->y1][pac->x2 + 1] > D && map[pac->y2][pac->x2 + 1] > D) {
 			options[noptions] = RIGHT;
 			noptions++;
 		}
@@ -291,14 +291,13 @@ public:
 
 	void eatFood(Pos* o, Pos* n) {
 		int mix = min(o->x1, n->x1);
-		int max = min(o->x2, n->x2);
+		int max = max(o->x2, n->x2);
 
 		int miy = min(o->y1, n->y1);
-		int may = min(o->y2, n->y2);
-
+		int may = max(o->y2, n->y2);
 
 		for(int i = mix; i <= max; i++) {
-			for(int j = miy; i <= may; j++) {
+			for(int j = miy; j <= may; j++) {
 				if(map[j][i] > 7) {
 					remainingFood--;
 					map[j][i] -= 2;
@@ -310,11 +309,15 @@ public:
 	void print() {
 		for(int x = 0; x < 32; x++) {
 			for(int y = 0; y < 29; y++) {
-				Serial.print(map[y][x]);
+				Serial.print((int)map[x][y]);
 				Serial.print(" ");
 			}
 			Serial.println();
 		}
+	}
+
+	void reset() {
+		dir = -1;
 	}
 
 	void updateBotPos() {

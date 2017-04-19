@@ -11,7 +11,7 @@
 #define SLEEP 18
 #define ADJUSTMOTORS 22
 
-#define FORWARDSPEED 11
+#define FORWARDSPEED 10
 #define TURNINGSPEED 6.0
 
 #define COOLDOWN() delay(150 - cutTime); \
@@ -74,10 +74,10 @@ public:
 		rightD = rd;
 		leftD = ld;
 		pid = new PID(&dummyLeft, &leftPWM, &dummyRight, 0.005, 50, 0.05, DIRECT);
-		pidspeed = new PID(&rightMotor->speed, &rightMasterPWM, &desiredSpeed, 2, 0.5, 0, DIRECT);
+		pidspeed = new PID(&dummyRight, &rightMasterPWM, &desiredSpeed, 2, 0.5, 0, DIRECT);
 		pidturnL = new PID(&dummyLeft, &leftPWM, &desiredSpeed, .01, 25, .05, DIRECT);
 		pidturnR =  new PID(&dummyRight, &rightMasterPWM, &desiredSpeed, .01, 25, .05, DIRECT);
-		walld = new PID(&rights->distance, &distanceAdjust, &lefts->distance, 1, 0.0005, 0.1, DIRECT); //.25,2,.1
+		walld = new PID(&rights->distance, &distanceAdjust, &lefts->distance, 1, 0.00005, 0.2, DIRECT); //.25,2,.1
 		walls = new PID(&rights->speed, &speedAdjust, &lefts->speed, 1, 0.0005, 0, DIRECT); //2,0,0.5
 		hlwalld = new PID(&lefts->distance, &distanceAdjust, &ilength, 5, .00005, 0.5, DIRECT); //1,0,.2
 		hlwalls = new PID(&lefts->speed, &speedAdjust, &ispeed, .5, 0.00, 0.0, DIRECT); //1,0,0
@@ -176,6 +176,7 @@ public:
 	}
 
 	void update(unsigned long d) {
+		// /Serial.println(abs((lefts->distance + rights->distance) - 3.0) <= 0.7);
 		dt = d;
 		dummyLeft = abs(leftMotor->speed);
 		dummyRight = abs(rightMotor->speed);
@@ -426,59 +427,34 @@ private:
 		calibrate();
 		pid->Compute();
 		pidspeed->Compute();
+		//Serial.println(abs(rights->distance - lefts->distance));
+		// Serial.print(leftMotor->speed);
+		// Serial.print("\t");
+		// Serial.print(rightMotor->speed);
+		// Serial.println("\t");
+		// Serial.print(lefts->distance);
+		// Serial.print("\t");
+		// Serial.print(rights->distance);
+		// Serial.println("\t");
 	}
 
 	void calibrate() {
-		// if(lefts->distance == 0.0 && rights->distance > 0.0 && rights->distance <= 3.25) {
-		// // 	walls->Reset();
-		// // 	walld->Reset();
-		// // 	hlwalls->Reset();
-		// // 	hlwalls->Reset();
-		// // 	hrwalls->Compute();
-		// // 	hrwalld->Compute();
-		// // 	dummyLeft += ((distanceAdjust + speedAdjust) > thhre ? (distanceAdjust + speedAdjust) - thhre : (distanceAdjust + speedAdjust) < -thhre ? (distanceAdjust + speedAdjust) + thhre : 0) / 6.0;
-		// // // 	Serial.println(rights->distance);
-		// // 	Serial.println(((distanceAdjust + speedAdjust) > thre ? (distanceAdjust + speedAdjust) - thre : (distanceAdjust + speedAdjust) < -thre ? (distanceAdjust + speedAdjust) + thre : 0) / 6.0);
-		// 	dummyLeft -= 0.1;
-		// 	//Serial.println("turn left");
-		// }
-		// else if(rights->distance == 0.0 && lefts->distance > 0.0 && lefts->distance <= 3.25) {
-		// 	// walls->Reset();
-		// 	// walld->Reset();
-		// 	// hrwalls->Reset();
-		// 	// hrwalls->Reset();
-		// 	// hlwalls->Compute();
-		// 	// hlwalld->Compute();
-		// 	// dummyLeft -= ((distanceAdjust + speedAdjust) > thre ? (distanceAdjust + speedAdjust) - thre : (distanceAdjust + speedAdjust) < -thre ? (distanceAdjust + speedAdjust) + thre : 0) / 6.0;
-		// 	// Serial.println("Left");
-		// 	// Serial.println(((distanceAdjust + speedAdjust) > thre ? (distanceAdjust + speedAdjust) - thre : (distanceAdjust + speedAdjust) < -thre ? (distanceAdjust + speedAdjust) + thre : 0) / 6.0);
-		// 	dummyLeft += 0.1;
-
-		// }
-		// else
-		 if(lefts->distance >= 0.5 && rights->distance >= 0.5 && (lefts->distance <= 3.25 && rights->distance <= 3.25)) {
-			// Serial.print(leftMotor->speed);
-			// Serial.print("\t");
-			// // Serial.print(lefts->speed);
-			// // Serial.print("\t");
-			// Serial.print(rightMotor->speed);
-			// Serial.println("\t");
+		 if((abs(lefts->distance + rights->distance)) - 3.0 <= .4) {//(rightD->getState() == COVERED && leftD->getState() == COVERED && ((lefts->distance >= 0 && rights->distance >= 0 && (lefts->distance <= 3 && rights->distance <= 3)))) {//(lefts->distance >= 0 && rights->distance >= 0 && (lefts->distance <= 3 && rights->distance <= 3)) {
 			hlwalls->Reset();
 			hlwalls->Reset();
 			hrwalls->Reset();
 			hrwalls->Reset();
-			walld->Compute();
-			walls->Compute();
+			walld->Compute();	
+			//walls->Compute();
 			dummyLeft += ((distanceAdjust + speedAdjust) > thre ? (distanceAdjust + speedAdjust) - thre : (distanceAdjust + speedAdjust) < -thre ? (distanceAdjust + speedAdjust) + thre : 0) / 3.0;
-			Serial.println(((distanceAdjust + speedAdjust) > thre ? (distanceAdjust + speedAdjust) - thre : (distanceAdjust + speedAdjust) < -thre ? (distanceAdjust + speedAdjust) + thre : 0) / 3.0);
+			//Serial.println(((distanceAdjust + speedAdjust) > thre ? (distanceAdjust + speedAdjust) - thre : (distanceAdjust + speedAdjust) < -thre ? (distanceAdjust + speedAdjust) + thre : 0) / 3.0);
+			//Serial.println(((distanceAdjust + speedAdjust) > thre ? (distanceAdjust + speedAdjust) - thre : (distanceAdjust + speedAdjust) < -thre ? (distanceAdjust + speedAdjust) + thre : 0));
+			//Serial.println(rights->distance);
+			//Serial.println(distanceAdjust);
+			Serial.println("Adjusting");
+
 		}
 		else {
-			// Serial.print(lefts->distance);
-			// Serial.print("\t");
-			// // Serial.print(lefts->speed);
-			// // Serial.print("\t");
-			// Serial.print(rights->distance);
-			// Serial.println("\t");
 			walls->Reset();
 			walld->Reset();
 			hlwalls->Reset();

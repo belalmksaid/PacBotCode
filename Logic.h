@@ -10,6 +10,7 @@
 #define CHASE 1
 #define LOST 2
 #define SCATTER 3
+#define DEAD 4
 
 #define CCP false //If the robot is allowed to generate paths
 
@@ -23,14 +24,17 @@ public:
 		driver = d; 
 		pos = d->leftMotor->encoderPos1;
 		path = new Path();
-		//d->setLeft();
+		//d->setRight();
 		//d->setCCW();
 		d->setStraight();
+
 	}
 
 	void update() {
+		if(mode == DEAD)
+			return;
 		map->update();
-		//assessOptions();
+		// assessOptions();
 	}
 
 	void assessOptions() {
@@ -98,7 +102,7 @@ public:
 
 	}
 
-	char mode = CAUTIOUS;
+	char mode = SCATTER;
 
 	vector<2> choice;
 
@@ -108,37 +112,51 @@ public:
 	void simpleAI() {
 		if(mode == SCATTER) {
 			// path->push(KeepForward);
+			// path->push(KeepForward);
+			// path->push(TurnLeft);
+			// path->push(KeepForward);
+			// path->push(KeepForward);
+			// path->push(KeepForward);
+			// path->push(KeepForward);
+			// path->push(TurnLeft);
+			path->push(KeepForward);
+			path->push(KeepForward);
+			// path->push(KeepForward);
+			// path->push(KeepForward);
+			// path->push(KeepForward);
+			path->push(TurnLeft);
+			// path->push(KeepForward);
+			// path->push(KeepForward);
+			// path->push(KeepForward);
+			// path->push(TurnLeft);
+			// path->push(KeepForward);
+			// path->push(KeepForward);
+			// path->push(KeepForward);
+			// path->push(TurnLeft);
 			// path->push(TurnRight);
+			// path->push(KeepForward);
 			// path->push(TurnLeft);
 			// path->push(TurnLeft);
 			// path->push(KeepForward);
-			path->push(KeepForward);
-			path->push(KeepForward);
-			path->push(TurnLeft);
-			path->push(TurnRight);
-			path->push(KeepForward);
-			path->push(TurnLeft);
-			path->push(TurnLeft);
-			path->push(KeepForward);
-			path->push(KeepForward);
-			path->push(TurnLeft);
-			path->push(TurnLeft);
-			path->push(KeepForward);
-			path->push(TurnRight);
-			path->push(TurnLeft);
-			path->push(KeepForward);
-			path->push(KeepForward);
-			path->push(TurnRight);
-			path->push(TurnLeft);
-			path->push(TurnRight);
-			path->push(KeepForward);
-			path->push(TurnLeft);
-			path->push(TurnRight);
-			path->push(KeepForward);
-			path->push(TurnRight);
-			path->push(KeepForward);
-			path->push(TurnRight);
-			path->push(TurnRight);
+			// path->push(KeepForward);
+			// path->push(TurnLeft);
+			// path->push(TurnLeft);
+			// path->push(KeepForward);
+			// path->push(TurnRight);
+			// path->push(TurnLeft);
+			// path->push(KeepForward);
+			// path->push(KeepForward);
+			// path->push(TurnRight);
+			// path->push(TurnLeft);
+			// path->push(TurnRight);
+			// path->push(KeepForward);
+			// path->push(TurnLeft);
+			// path->push(TurnRight);
+			// path->push(KeepForward);
+			// path->push(TurnRight);
+			// path->push(KeepForward);
+			// path->push(TurnRight);
+			// path->push(TurnRight);
 
 		}
 		else if(mode == CAUTIOUS) {
@@ -146,10 +164,12 @@ public:
 			choice[1] = -384738;
 			map->getOptionsMod();
 			for(int j = 0; j < 4; j++) { // iterate through ghosts
-				*(map->ghosts[j].proj) = pathAl.projectMod(&map->ghosts[j].pos, map->ghosts[j].pos.orien, map);
+				pathAl.projectMod(&map->ghosts[j].pos, map->ghosts[j].pos.orien, map, map->ghosts[j].proj);
 				int d = 12344;
+				if((*map->ghosts[j].proj)[0] == -1) return;
 				for(int i = 0; i < map->noptions; i++){
-					vector<5> proj = pathAl.projectMod(map->pac, map->options[i], map);
+					vector<5> proj;
+					pathAl.projectMod(map->pac, map->options[i], map, &proj);
 					if(oppositeDirections(map->options[i], map->ghosts[j].pos.orien) && inbetween(map->ghosts[j].pos, map->pac, proj)) {
 						return;
 					}
@@ -162,7 +182,13 @@ public:
 					}
 				}
 			}
-			enforceChoice(map->options[choice[0]]);	
+			if(choice[0] < 0) {
+				r = (random(map->noptions));
+				enforceChoice(map->options[r]);
+			}
+			else {	
+				enforceChoice(map->options[choice[0]]);	
+			}
 		}
 		else if(mode == CHASE) {
 

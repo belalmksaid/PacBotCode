@@ -32,6 +32,7 @@ public:
 	void resetChain() {
 		for(int i = 0; i < CHAINSIZE; i++) {
 			chain[i] = 0;
+			speedChain[i] = 0.0;
 		}
 	}
 
@@ -40,9 +41,10 @@ public:
 			val = digitalRead(pin);
 		}
 		else if(type == IRSHORTL) {
-			val = analogRead(pin);
+			
 			if(ts - timeStamp < 70000)
 				return;
+			val = analogRead(pin);
 			oldDistance = distance;
 			distance = 0.0;
 			timeAvg = 0.0;
@@ -55,25 +57,25 @@ public:
     			distance += chain[i + 1];
     			speed += speedChain[i + 1];
     		}
-			chain[CHAINSIZE - 1] = max(0, min((2335.58/(val * 5.0 - 357.47) + -.19173), ceiling));
-			if(chain[CHAINSIZE - 1] >= ceiling || chain[CHAINSIZE - 1] <= 0) 
-				resetChain();
-			else 
+			chain[CHAINSIZE - 1] = (454.1513/(val + -52.5) + -1.059);
+			// if(chain[CHAINSIZE - 1] >= ceiling || chain[CHAINSIZE - 1] <= -0.1) 
+			// 	resetChain();
+			// else 
 				chain[CHAINSIZE - 1] /= 5.0;
 			timeChain[CHAINSIZE - 1] = (ts - timeStamp) / 1000000.0;
 			distance += chain[4];
+			distance = distance;
 			speedChain[CHAINSIZE - 1] = (chain[CHAINSIZE - 1] - chain[0]) / (timeAvg);
 			speed += speedChain[CHAINSIZE - 1] / 5.0;
 			timeStamp = ts;
-			if(distance > ceiling || distance < 0) {
-				distance = 0;
-				speed = 0;
-			}
+			//Serial.println(distance);					
 		}
 		else if(type == IRSHORTR) {
-			val = analogRead(pin);
+			
+
 			if(ts - timeStamp < 70000)
 				return;
+			val = analogRead(pin);
 			oldDistance = distance;
 			distance = 0.0;
 			timeAvg = 0.0;
@@ -86,20 +88,21 @@ public:
     			distance += chain[i + 1];
     			speed += speedChain[i + 1];
     		}
-			chain[CHAINSIZE - 1] = max(0, min(3611.852/(val * 5.0 - 37.49)+ -.40869, ceiling));
-			if(chain[CHAINSIZE - 1] >= ceiling || chain[CHAINSIZE - 1] <= 0) 
-				resetChain();
+			chain[CHAINSIZE - 1] = 505.72/(val - 45.76) + -1.104;
+			if(abs(speedChain[CHAINSIZE - 1]) > 5) { //(chain[CHAINSIZE - 1] >= ceiling || chain[CHAINSIZE - 1] <= -0.1) 
+			 	resetChain();
+
+			 }
 			else 
 				chain[CHAINSIZE - 1] /= 5.0;
 			timeChain[CHAINSIZE - 1] = (ts - timeStamp) / 1000000.0;
 			distance += chain[4];
+			distance =distance;
 			speedChain[CHAINSIZE - 1] = (chain[CHAINSIZE - 1] - chain[0]) / (timeAvg);
 			speed += speedChain[CHAINSIZE - 1] / 5.0;
 			timeStamp = ts;
-			if(distance > ceiling || distance < 0) {
-				distance = 0;
-				speed = 0;
-			}
+			// /Serial.println(distance);
+			// /Serial.println(speed);
 		}
 		else if(type == IR) {
 			val = analogRead(pin);
@@ -120,6 +123,7 @@ public:
 			chain[CHAINSIZE - 1] = (4406.752818/(val + 51.80904) + -1.74687) / 5.0;
 			timeChain[CHAINSIZE - 1] = (ts - timeStamp) / 1000.0;
 			distance += chain[4];
+
 			speedChain[CHAINSIZE - 1] = (chain[CHAINSIZE - 1] - chain[0]) / (timeAvg);
 			speed += speedChain[CHAINSIZE - 1] / 5.0;
 			timeStamp = ts;
