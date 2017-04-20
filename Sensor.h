@@ -11,7 +11,7 @@
 #define COVERED 0
 #define OPEN 1
 
-#define ceiling 3.8 // maximum distance by the Sensor
+#define ceiling 4.1 // maximum distance by the Sensor
 
 #include "Arduino.h"
 
@@ -58,9 +58,9 @@ public:
     			speed += speedChain[i + 1];
     		}
 			chain[CHAINSIZE - 1] = (454.1513/(val + -52.5) + -1.059);
-			// if(chain[CHAINSIZE - 1] >= ceiling || chain[CHAINSIZE - 1] <= -0.1) 
-			// 	resetChain();
-			// else 
+			if(abs(chain[CHAINSIZE - 1]) >= ceiling) 
+				resetChain();
+			else 
 				chain[CHAINSIZE - 1] /= 5.0;
 			timeChain[CHAINSIZE - 1] = (ts - timeStamp) / 1000000.0;
 			distance += chain[4];
@@ -89,10 +89,12 @@ public:
     			speed += speedChain[i + 1];
     		}
 			chain[CHAINSIZE - 1] = 505.72/(val - 45.76) + -1.104;
-			if(abs(speedChain[CHAINSIZE - 1]) > 5) { //(chain[CHAINSIZE - 1] >= ceiling || chain[CHAINSIZE - 1] <= -0.1) 
-			 	resetChain();
+			// if(abs(speedChain[CHAINSIZE - 1]) > 5) { //(chain[CHAINSIZE - 1] >= ceiling || chain[CHAINSIZE - 1] <= -0.1) 
+			//  	resetChain();
 
-			 }
+			//  }
+			if(abs(chain[CHAINSIZE - 1]) >= ceiling) 
+				resetChain();
 			else 
 				chain[CHAINSIZE - 1] /= 5.0;
 			timeChain[CHAINSIZE - 1] = (ts - timeStamp) / 1000000.0;

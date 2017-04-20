@@ -77,8 +77,8 @@ public:
 		pidspeed = new PID(&dummyRight, &rightMasterPWM, &desiredSpeed, 2, 0.5, 0, DIRECT);
 		pidturnL = new PID(&dummyLeft, &leftPWM, &desiredSpeed, .01, 25, .05, DIRECT);
 		pidturnR =  new PID(&dummyRight, &rightMasterPWM, &desiredSpeed, .01, 25, .05, DIRECT);
-		walld = new PID(&rights->distance, &distanceAdjust, &lefts->distance, 1, 0.00005, 0.2, DIRECT); //.25,2,.1
-		walls = new PID(&rights->speed, &speedAdjust, &lefts->speed, 1, 0.0005, 0, DIRECT); //2,0,0.5
+		walld = new PID(&rights->distance, &distanceAdjust, &lefts->distance, .9, 0.00005, 0.2, DIRECT); //.25,2,.1
+		walls = new PID(&rights->speed, &speedAdjust, &lefts->speed, .8, 0.0006, 0, DIRECT); //2,0,0.5
 		hlwalld = new PID(&lefts->distance, &distanceAdjust, &ilength, 5, .00005, 0.5, DIRECT); //1,0,.2
 		hlwalls = new PID(&lefts->speed, &speedAdjust, &ispeed, .5, 0.00, 0.0, DIRECT); //1,0,0
 		hrwalld = new PID(&rights->distance, &distanceAdjust, &ilength, 5, .00005, 0.5, DIRECT); //1,0,.2
@@ -439,19 +439,20 @@ private:
 	}
 
 	void calibrate() {
-		 if((abs(lefts->distance + rights->distance)) - 3.0 <= .4) {//(rightD->getState() == COVERED && leftD->getState() == COVERED && ((lefts->distance >= 0 && rights->distance >= 0 && (lefts->distance <= 3 && rights->distance <= 3)))) {//(lefts->distance >= 0 && rights->distance >= 0 && (lefts->distance <= 3 && rights->distance <= 3)) {
+		 if(abs((abs(lefts->distance + rights->distance)) - 3.0) <= 1 && abs(lefts->distance) <= ceiling &&  abs(rights->distance) <= ceiling) {//(rightD->getState() == COVERED && leftD->getState() == COVERED && ((lefts->distance >= 0 && rights->distance >= 0 && (lefts->distance <= 3 && rights->distance <= 3)))) {//(lefts->distance >= 0 && rights->distance >= 0 && (lefts->distance <= 3 && rights->distance <= 3)) {
 			hlwalls->Reset();
 			hlwalls->Reset();
 			hrwalls->Reset();
 			hrwalls->Reset();
 			walld->Compute();	
-			//walls->Compute();
+			walls->Compute();
 			dummyLeft += ((distanceAdjust + speedAdjust) > thre ? (distanceAdjust + speedAdjust) - thre : (distanceAdjust + speedAdjust) < -thre ? (distanceAdjust + speedAdjust) + thre : 0) / 3.0;
 			//Serial.println(((distanceAdjust + speedAdjust) > thre ? (distanceAdjust + speedAdjust) - thre : (distanceAdjust + speedAdjust) < -thre ? (distanceAdjust + speedAdjust) + thre : 0) / 3.0);
 			//Serial.println(((distanceAdjust + speedAdjust) > thre ? (distanceAdjust + speedAdjust) - thre : (distanceAdjust + speedAdjust) < -thre ? (distanceAdjust + speedAdjust) + thre : 0));
 			//Serial.println(rights->distance);
 			//Serial.println(distanceAdjust);
-			Serial.println("Adjusting");
+			
+			//Serial.println("Adjusting");
 
 		}
 		else {
@@ -461,6 +462,10 @@ private:
 			hlwalls->Reset();
 			hrwalls->Reset();
 			hrwalls->Reset();
+		// 	Serial.print(lefts->distance);
+		// Serial.print("\t");
+		// Serial.print(rights->distance);
+		// Serial.println("\t");
 		}
 	}
 };

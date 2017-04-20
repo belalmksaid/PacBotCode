@@ -26,7 +26,7 @@ public:
 		path = new Path();
 		//d->setRight();
 		//d->setCCW();
-		d->setStraight();
+		//d->setStraight();
 
 	}
 
@@ -34,7 +34,7 @@ public:
 		if(mode == DEAD)
 			return;
 		map->update();
-		// assessOptions();
+		assessOptions();
 	}
 
 	void assessOptions() {
