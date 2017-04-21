@@ -28,7 +28,6 @@
 #define BD 3.723475
 #define WD 1.5575
 #define STEPS90 BD * PI / 4.0 / (WD * PI) * CSTEPS - 7
-#define STEPS90R BD * PI / 4.0 / (WD * PI) * CSTEPS - 15
 #define STEPS180 (STEPS90 + 3) * 2.0 - 3
 
 #define thre 0.32
@@ -79,8 +78,8 @@ public:
 		pidspeed = new PID(&dummyRight, &rightMasterPWM, &desiredSpeed, 2, 1, 0, DIRECT);
 		pidturnL = new PID(&dummyLeft, &leftPWM, &desiredSpeed, .01, 25, .05, DIRECT);
 		pidturnR =  new PID(&dummyRight, &rightMasterPWM, &desiredSpeed, .01, 25, .05, DIRECT);
-		walld = new PID(&rights->distance, &distanceAdjust, &lefts->distance, .05, 0.01, 0.05, DIRECT); //.25,2,.1
-		walls = new PID(&rights->speed, &speedAdjust, &lefts->speed, 2.1, 0.1, 0, DIRECT); //2,0,0.5
+		walld = new PID(&rights->distance, &distanceAdjust, &lefts->distance, 1.5, 0.005, 0.1, DIRECT); //.25,2,.1
+		walls = new PID(&rights->speed, &speedAdjust, &lefts->speed, 1, 0.01, 0, DIRECT); //2,0,0.5
 		hlwalld = new PID(&lefts->distance, &distanceAdjust, &ilength, 5, .00005, 0.5, DIRECT); //1,0,.2
 		hlwalls = new PID(&lefts->speed, &speedAdjust, &ispeed, .5, 0.00, 0.0, DIRECT); //1,0,0
 		hrwalld = new PID(&rights->distance, &distanceAdjust, &ilength, 5, .00005, 0.5, DIRECT); //1,0,.2
@@ -235,26 +234,6 @@ private:
 	double var = 0.0;
 	volatile long startEncLeft = 0;
 	volatile long startEncRight = 0;
-
-	unsigned long turncount = 0;
-	long p = 0;
-	bool a = false;
-
-	// #define stuck if(abs(p - epos) <= 2 && turncount < 10) turncount++
-						// else { \
-						// 	turncount = 0; \
-						// } \
-						// if(turncount >= 10) { \
-						// 	turncount--; \
-						// 	if(turncount == 10) \
-						// 		a = !a; \
-						// 	if(a) \
-						// 		moveForward(); \
-						// 	else \
-						// 		moveBack(); \
-						// 	return; \
-						// } \
-
 	void turnRight() {
 		if(fcall) {
 			stop();
@@ -265,29 +244,13 @@ private:
 			pidturnL->Reset();
 		}
 		else {
-			// if(abs(p - leftMotor->encoderPos1) <= 2 && turncount < 10) 
-			// 	turncount++;
-			// else { 
-			// 	turncount = 0; 
-			// } 
-			// p = leftMotor->encoderPos1;
-			// if(turncount >= 10) { 
-			// 	turncount--; 
-			// 	if(turncount == 10) 
-			// 		a = !a; 
-			// 	if(a) 
-			// 		moveForward(); 
-			// 	else 
-			// 		moveBack(); 
-			// 	return; 
-			// } 
-			if(startEncLeft + STEPS90R <= leftMotor->encoderPos1 && startEncRight - rightMotor->encoderPos1 >= STEPS90R) {
+			if(startEncLeft + STEPS90 <= leftMotor->encoderPos1 && startEncRight - rightMotor->encoderPos1 >= STEPS90) {
 				freeze();
 				COOLDOWN();
 				return;
 			}
 			
-			if(startEncLeft + STEPS90R <= leftMotor->encoderPos1) {
+			if(startEncLeft + STEPS90 <= leftMotor->encoderPos1) {
 				leftMotor->freeze();
 			}
 			else {
@@ -297,7 +260,7 @@ private:
 				dummyLeft = abs(leftMotor->speed);
 				pidturnL->Compute();
 			}
-			if(startEncRight - rightMotor->encoderPos1 >= STEPS90R) {
+			if(startEncRight - rightMotor->encoderPos1 >= STEPS90) {
 				rightMotor->freeze();
 			}
 			else {
@@ -319,25 +282,8 @@ private:
 			pidturnR->Reset();
 			pidturnL->Reset();
 		}
-		// if(abs(p - leftMotor->encoderPos1) <= 1 && turncount < 10) 
-		// 		turncount++;
-		// 	else { 
-		// 		turncount = 0; 
-		// 	} 
-		// 	p = leftMotor->encoderPos1;
-		// 	if(turncount >= 10) { 
-		// 		turncount--; 
-		// 		if(turncount == 10) 
-		// 			a = !a; 
-		// 		if(a) 
-		// 			moveForward(); 
-		// 		else 
-		// 			moveBack(); 
-		// 		return; 
-		// 	} 
 		else {
 			// /Serial.println(abs(leftMotor->distance) <= 0.0001);
-			// /stuck();
 			pspeed = leftMotor->speed;
 			if(startEncLeft - leftMotor->encoderPos1 >= STEPS90 && startEncRight + STEPS90 <= rightMotor->encoderPos1) {
 				freeze();
@@ -509,18 +455,6 @@ private:
 		// Serial.print("\t");
 		// Serial.print(rights->distance);
 		// Serial.println("\t");
-	}
-
-	void moveBack() {
-		leftMotor->setDirection(CLOCKWISE);
-		rightMotor->setDirection(ANTICLOCKWISE);
-		leftMotor->setValue((int)leftPWM);
-		rightMotor->setValue((int)rightMasterPWM);
-		leftMotor->move();
-		rightMotor->move();
-		calibrate();
-		pid->Compute();
-		pidspeed->Compute();
 	}
 
 	void calibrate() {
