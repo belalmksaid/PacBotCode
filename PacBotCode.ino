@@ -59,7 +59,7 @@ void setup() {
   pinMode(13, OUTPUT); 
   digitalWrite(13, HIGH);   // turn the LED on (HIGH is the voltage level)
   driver.init();
-  gMap.init(14, 14, 23, 24, UP);
+  gMap.init(21, 22, 26, 27, UP);
   randomSeed(analogRead(A0));
   xbee.begin(9600);
   //while(!Serial) { }
