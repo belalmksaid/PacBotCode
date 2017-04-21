@@ -42,7 +42,7 @@ public:
 		}
 		else if(type == IRSHORTL) {
 			
-			if(ts - timeStamp < 70000)
+			if(ts - timeStamp < 10000)
 				return;
 			val = analogRead(pin);
 			oldDistance = distance;
@@ -73,7 +73,7 @@ public:
 		else if(type == IRSHORTR) {
 			
 
-			if(ts - timeStamp < 70000)
+			if(ts - timeStamp < 10000)
 				return;
 			val = analogRead(pin);
 			oldDistance = distance;

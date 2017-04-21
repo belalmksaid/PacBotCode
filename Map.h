@@ -339,7 +339,7 @@ public:
 			// }
 			// else
 			 if(!grace && (((driver->rightD->getState() == OPEN && driver->leftD->getState() == OPEN && dir == 2) ||
-				(driver->leftD->getState() == COVERED && driver->rightD->getState() == OPEN && dir == 0) || (driver->leftD->getState() == OPEN && driver->rightD->getState() == COVERED && dir == 1))))
+				(driver->leftD->getState() == COVERED && driver->rightD->getState() == OPEN && dir == 0) || (driver->leftD->getState() == OPEN && driver->rightD->getState() == COVERED && dir == 1)) || driver->fronts->distance <= 3))
 			{
 				pac->x1 = ploc->x1;
 					pac->x2 = ploc->x2;

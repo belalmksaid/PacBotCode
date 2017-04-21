@@ -165,14 +165,14 @@ public:
 			// goforward();
 			// die();
 
-			F F F F R D
+			//F F F F R D
 
-			// L F L L R R R R L L 
-			// //R R R F U F R F R L
-			// R R F F R L
-			// F F L R R
-			// R L R R F F F R L F
-			// D 
+			L F L L R R R R L L 
+			//R R R F U F R F R L
+			R R F F R L
+			F F L R R
+			R L R R F F F R L F
+			D 
 			mode = SCATTER;
 		}
 		else if(mode == CAUTIOUS) {
