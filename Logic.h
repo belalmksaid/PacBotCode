@@ -9,8 +9,9 @@
 #define CAUTIOUS 0
 #define CHASE 1
 #define LOST 2
+#define FIRSTTIME 4
 #define SCATTER 3
-#define DEAD 4
+#define DEAD 50
 
 #define CCP false //If the robot is allowed to generate paths
 
@@ -26,6 +27,7 @@ public:
 		path = new Path();
 		//d->setRight();
 		//d->setCCW();
+		//d->setLeft();
 		//d->setStraight();
 
 	}
@@ -38,6 +40,7 @@ public:
 	}
 
 	void assessOptions() {
+		if(driver->status == DEAD) return;
 		if(driver->status == TURNINGLEFT || driver->status == TURNINGRIGHT || driver->status == TURNINGBACKCW || driver->status == TURNINGBACKCCW) { // if the robot is turning don't make any new decisions
 			if(path->size <= 0) {
 				driver->cutTime = millis();
@@ -80,8 +83,12 @@ public:
 		else if(n == KeepForward) {
 			driver->setStraight();
 		}
+		else if(n == Die) {
+			driver->Kill();
+			mode = DEAD;
+		}
 		else {
-			driver->setCCW();
+			driver->setTurnAround();
 		}
 		decisionMade = true;
 		map->grace = true;
@@ -94,7 +101,6 @@ public:
 	void createPath() {
 		if(CCP) {
 			path->reset();
-
 		}
 		else {
 			controlledWander();
@@ -102,62 +108,67 @@ public:
 
 	}
 
-	char mode = SCATTER;
+	char mode = FIRSTTIME;
 
 	vector<2> choice;
 
 	#define oppositeDirections(a, b) ((a == RIGHT && b == LEFT) || (a == LEFT && b == RIGHT) || (a == UP && b == DOWN) || (a == DOWN && b == UP))
 	#define inbetween(a, b, c) (false)
 
-	void simpleAI() {
-		if(mode == SCATTER) {
-			// path->push(KeepForward);
-			// path->push(KeepForward);
-			// path->push(TurnLeft);
-			// path->push(KeepForward);
-			// path->push(KeepForward);
-			// path->push(KeepForward);
-			// path->push(KeepForward);
-			// path->push(TurnLeft);
-			path->push(KeepForward);
-			path->push(KeepForward);
-			// path->push(KeepForward);
-			// path->push(KeepForward);
-			// path->push(KeepForward);
-			path->push(TurnLeft);
-			// path->push(KeepForward);
-			// path->push(KeepForward);
-			// path->push(KeepForward);
-			// path->push(TurnLeft);
-			// path->push(KeepForward);
-			// path->push(KeepForward);
-			// path->push(KeepForward);
-			// path->push(TurnLeft);
-			// path->push(TurnRight);
-			// path->push(KeepForward);
-			// path->push(TurnLeft);
-			// path->push(TurnLeft);
-			// path->push(KeepForward);
-			// path->push(KeepForward);
-			// path->push(TurnLeft);
-			// path->push(TurnLeft);
-			// path->push(KeepForward);
-			// path->push(TurnRight);
-			// path->push(TurnLeft);
-			// path->push(KeepForward);
-			// path->push(KeepForward);
-			// path->push(TurnRight);
-			// path->push(TurnLeft);
-			// path->push(TurnRight);
-			// path->push(KeepForward);
-			// path->push(TurnLeft);
-			// path->push(TurnRight);
-			// path->push(KeepForward);
-			// path->push(TurnRight);
-			// path->push(KeepForward);
-			// path->push(TurnRight);
-			// path->push(TurnRight);
+	#define goforward() path->push(KeepForward)
+	#define goright() path->push(TurnRight)
+	#define goleft() path->push(TurnLeft)
+	#define turnaround() path->push(TurnAround)
+	#define die() path->push(Die);
+	#define F goforward();
+	#define L goleft();
+	#define R goright();
+	#define U turnaround();
+	#define D die();
 
+	void simpleAI() {
+		if(mode == FIRSTTIME) {
+			//Loop bottom right
+			// goleft();
+			// goright();
+			// goleft();
+			// goright();
+			// goright();
+			// goleft();
+			// goforward();
+			// goright();
+			// goright();
+
+			// Waseem
+			// goforward();
+			// goleft();
+			// goforward();
+			// goright();
+			// goleft();
+			// goleft();
+			// goright();
+			// goleft();
+			// goright();
+			// goforward();
+			// goright();
+			// goright();
+			// goleft();
+			// goleft();
+			// goright();
+			// die();
+
+			// goforward();
+			// goforward();
+			// goforward();
+			// turnaround();
+			// goforward();
+			// goforward();
+			// die();
+			L F L L R R R R L L 
+			R R R F U F R F R L
+			F F L R R
+			D 
+			mode = SCATTER;
 		}
 		else if(mode == CAUTIOUS) {
 			choice[0] = -283712;

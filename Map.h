@@ -16,6 +16,7 @@
 #define TurnRight 1
 #define TurnLeft 3
 #define TurnAround 2
+#define Die 20
 
 #define PELLET 9
 #define PELLETNODE 8
@@ -320,25 +321,40 @@ public:
 		dir = -1;
 	}
 
+	bool countDown = false;
+	int count = 0;
+
 	void updateBotPos() {
 		if(driver->status == MOVINGFORWARD) {
 			busy = false;
-			if(!grace && (((driver->rightD->getState() == OPEN && driver->leftD->getState() == OPEN && dir == 2) ||
+			// if(countDown) {
+			// 	if(count == 0) {
+			// 		count = 0;
+			// 		countDown = false;
+					
+			// 	}
+			// 	else {
+			// 		count--;
+			// 	}
+			// }
+			// else
+			 if(!grace && (((driver->rightD->getState() == OPEN && driver->leftD->getState() == OPEN && dir == 2) ||
 				(driver->leftD->getState() == COVERED && driver->rightD->getState() == OPEN && dir == 0) || (driver->leftD->getState() == OPEN && driver->rightD->getState() == COVERED && dir == 1))))
 			{
 				pac->x1 = ploc->x1;
-				pac->x2 = ploc->x2;
-				pac->y1 = ploc->y1;
-				pac->y2 = ploc->y2;
-				pac->updatePos();
-				//solMap->updateCurrentNode(pac);
-				dir = -1;
-				atDecisionPoint = true;
-				updateProjections = true;
+					pac->x2 = ploc->x2;
+					pac->y1 = ploc->y1;
+					pac->y2 = ploc->y2;
+					pac->updatePos();
+					//solMap->updateCurrentNode(pac);
+					dir = -1;
+					atDecisionPoint = true;
+					updateProjections = true;
+				
 			}
 			else if(grace) {
 				dis += abs((driver->leftMotor->distance + driver->rightMotor->distance)) * 0.5;
-				if(dis >= 7.0) {
+				if(dis >= 7.3) {
 					grace = false;
 					dis = 0.0;
 				}

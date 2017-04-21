@@ -59,32 +59,34 @@ void setup() {
   pinMode(13, OUTPUT); 
   digitalWrite(13, HIGH);   // turn the LED on (HIGH is the voltage level)
   driver.init();
-  gMap.init(15, 16, 29, 30, RIGHT);
+  gMap.init(14, 14, 23, 24, UP);
   randomSeed(analogRead(A0));
   xbee.begin(9600);
   //while(!Serial) { }
   //testing();
 }
 
-volatile int startUpTime = 50000;
+volatile int startUpTime = 2000;
 
 void loop() {
   if(startUpTime > 0) {
     schedule.updateSensorsOnly();
+    //xxbee.println(startUpTime);
     startUpTime--;
   }
   else {
-    getCommand();
+    //getCommand();
     if(command == START) {
       schedule.update();
       logic.update();
     }
+//    /sendCurrentCoor();
   }
 }
 
 char tempQ;
 void getCommand() {
-  if(xbee.available() > 0) {
+  while(xbee.available() > 0) {
     tempQ = xbee.read();
     if(tempQ != ';')
       commandQ.push(tempQ);
@@ -93,16 +95,37 @@ void getCommand() {
   }
 }
 
+void sendCurrentCoor() {
+  xbee.print(gMap.pac->x1);
+  xbee.print(" ");
+  xbee.print(gMap.pac->x2);
+  xbee.print(" ");
+  xbee.print(gMap.pac->y1);
+  xbee.print(" ");
+  xbee.print(gMap.pac->y1);
+  xbee.println();
+}
+
 void interpret() {
+  char c;
   while(commandQ.size > 0) {
-    Serial.print(commandQ.pop());
+    c = commandQ.pop();
+    if(c == 0) {
+//      command = START;
+//      reset();
+    }
+    else if(c == 1) {
+//      command = STOP;
+//      logic.mode = DEAD;
+      driver.Kill();
+    }
+
   }
-  Serial.println();
   commandQ.reset();
 }
 
 void reset() {
-  gMap.init(14, 14, 23, 24, LEFT);
+  gMap.init(14, 14, 23, 24, UP);
   gMap.reset();
   driver.status = SLEEP;
 }
