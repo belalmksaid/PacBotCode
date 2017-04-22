@@ -1,4 +1,6 @@
 #include <SoftwareSerial.h>
+#include <string.h>
+
 
 #include "Motor.h"
 #include "Driver.h"
@@ -20,7 +22,7 @@
 #define RSENSOR 16
 #define LDSENSOR 5
 #define RDSENSOR 4
-#define FSENSOR 18
+#define FSENSOR 15
 #define BSENSOR 0
 
 //other pins
@@ -50,7 +52,11 @@ Map gMap(&driver);
 Logic logic(&driver, &gMap);
 
 SoftwareSerial xbee(RX, TX);
-Queue<char> commandQ;
+//Queue<char> commandQ;
+char currCString[200];
+//char* currString = malloc(200*sizeof(char));
+//currString[0] = '\0';
+//String currString;
 
 volatile short command = START;
 
@@ -59,10 +65,11 @@ void setup() {
   pinMode(13, OUTPUT); 
   digitalWrite(13, HIGH);   // turn the LED on (HIGH is the voltage level)
   driver.init();
-  gMap.init(14, 14, 23, 24, UP);
+  gMap.init(12, 13, 23, 24, UP);
   randomSeed(analogRead(A0));
   xbee.begin(9600);
-  while(!Serial) { }
+  //while(!Serial) { }
+
   //testing();
 }
 
@@ -79,19 +86,53 @@ void loop() {
     if(command == START) {
       schedule.update();
       logic.update();
+      Serial.println(front.distance);
+    }
+    else if(command == STOP) {
+      driver.freeze();
     }
 //    /sendCurrentCoor();
   }
 }
 
-char tempQ;
-void getCommand() {
+//char tempQ;
+//void getCommand() {
+//  while(xbee.available() <= 1 && command == STOP) { }
+//  while(xbee.available() > 0) {
+//    tempQ = xbee.read();
+//    Serial.print(tempQ);
+//    if(tempQ != ';')
+//      commandQ.push(tempQ);
+//    else
+//      interpret();  
+//  }
+//}
+
+int ii = 0;
+int stringLen = 0;
+bool firstTime = true;
+char tempChar;
+void getCommand(){
+  while(xbee.available() <= 1 && command == STOP) { }
   while(xbee.available() > 0) {
-    tempQ = xbee.read();
-    if(tempQ != ';')
-      commandQ.push(tempQ);
-    else
-      interpret();  
+    tempChar = xbee.read();
+    if (firstTime == true){
+      firstTime = false;  
+    }
+    else if(tempChar == '$'){
+      stringLen = ii;
+      ii = 0;
+      command = START;
+      interpret();
+      //currCString[0] = '\0';
+    }
+    else if(tempChar == 's') {
+      command = STOP;
+    }
+    //Serial.println(ii);
+    currCString[ii] = tempChar;
+    //Serial.println();
+    ii++;
   }
 }
 
@@ -106,22 +147,100 @@ void sendCurrentCoor() {
   xbee.println();
 }
 
-void interpret() {
-  char c;
-  while(commandQ.size > 0) {
-    c = commandQ.pop();
-    if(c == 0) {
-//      command = START;
-//      reset();
-    }
-    else if(c == 1) {
-//      command = STOP;
-//      logic.mode = DEAD;
-      driver.Kill();
-    }
+//void interpret() {
+//  char c;
+//  while(commandQ.size > 0) {
+//    c = commandQ.pop();
+//    if(c == 0) {
+////      command = START;
+////      reset();
+//    }
+//    else if(c == 1) {
+////      command = STOP;
+////      logic.mode = DEAD;
+//      driver.Kill();
+//    }
+//
+//  }
+//  commandQ.reset();
+//}
 
+int timer = 0, pos, prevPos = 1;
+char delim = '#';
+String token;
+
+#define blinky (&gMap.ghosts[0].pos)
+#define pinky (&gMap.ghosts[1].pos)
+#define clyde (&gMap.ghosts[2].pos)
+#define inky (&gMap.ghosts[3].pos)
+
+void interpret(){
+  String currString(currCString);
+  //Serial.println(currString);
+  //Serial.println(currCString);
+  pos = 0; prevPos = 1;
+  timer = 0;
+  if(stringLen == 0){
+    return;
   }
-  commandQ.reset();
+  if (stringLen < 4){ 
+    command = STOP;
+    return; 
+  }
+  //erase first char
+  pos = currString.indexOf(delim, prevPos);
+  token = currString.substring(prevPos, pos);
+  gMap.pac->x = atoi(token.c_str());
+  prevPos = pos+1;
+  pos = currString.indexOf(delim, prevPos);
+  token = currString.substring(prevPos, pos);
+  gMap.pac->y = atoi(token.c_str());
+  prevPos = pos+1;
+  pos = currString.indexOf(delim, prevPos);
+  token = currString.substring(prevPos, pos);
+  blinky->x = atoi(token.c_str());
+  prevPos = pos+1;
+  pos = currString.indexOf(delim, prevPos);
+  token = currString.substring(prevPos, pos);
+  blinky->y = atoi(token.c_str());
+  prevPos = pos+1;
+  pos = currString.indexOf(delim, prevPos);
+  token = currString.substring(prevPos, pos);
+  pinky->x = atoi(token.c_str());
+  prevPos = pos+1;
+  pos = currString.indexOf(delim, prevPos);
+  token = currString.substring(prevPos, pos);
+  pinky->y = atoi(token.c_str());
+  prevPos = pos+1;
+  pos = currString.indexOf(delim, prevPos);
+  token = currString.substring(prevPos, pos);
+  clyde->x = atoi(token.c_str());
+  prevPos = pos+1;
+  pos = currString.indexOf(delim, prevPos);
+  token = currString.substring(prevPos, pos);
+  clyde->y = atoi(token.c_str());
+  prevPos = pos+1;
+  pos = currString.indexOf(delim, prevPos);
+  token = currString.substring(prevPos, pos);
+  inky->x = atoi(token.c_str());
+  prevPos = pos+1;
+  pos = currString.indexOf(delim, prevPos);
+  token = currString.substring(prevPos, pos);
+  inky->y = atoi(token.c_str());
+  prevPos = pos+1;
+  if (pos != stringLen){
+    pos = currString.indexOf(delim, prevPos);
+    token = currString.substring(prevPos, pos);
+    timer = atoi(token.c_str());  
+  }
+// gMap.pac->printd();
+//  blinky->printd();
+//  pinky->printd();
+//  clyde->printd();
+//  inky->printd();
+//  Serial.println(timer);
+//   Serial.println(command == START);
+    
 }
 
 void reset() {

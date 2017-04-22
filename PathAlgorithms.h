@@ -12,7 +12,6 @@
 #define isInRange(i, j) (i > 0 && j > 0 && i < 29 && j < 32)
 #define isValid(a) (a[0] > 0 && a[2] > 0 && a[1] < 28 && a[3] < 31)
 
-#define length(v)  dist[v[2]][v[0]]
 
 
 class PathAl {

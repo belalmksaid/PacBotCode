@@ -76,11 +76,10 @@ public:
 			if(ts - timeStamp < 20000)
 				return;
 			val = analogRead(pin);
-			p = (4406.752818/(val + 51.80904) + -1.74687);
-			p = p + (0.7) * (oldDistance - p);
+			p = (1788.964/(val + 153.005) + -1.927);
+			p = p + (0.5) * (oldDistance - p);
 			distance = p;
 			oldDistance = p;
-			//Serial.println(distance);
 		}		
 	}
 	int getState() {

@@ -71,7 +71,7 @@ public:
 	};
 
 	Pos* pac;
-	Ghost ghosts[4] = { Ghost(0,0,0,0, UP, BLINKY, this), Ghost(0,0,0,0, DOWN, INKY, this), Ghost(0,0,0,0, LEFT, PINKY, this), Ghost(0,0,0,0, UP, CLYDE, this) };
+	Ghost ghosts[4] = { Ghost(0,0,0,0, UP, BLINKY, this), Ghost(0,0,0,0, LEFT, PINKY, this),  Ghost(0,0,0,0, UP, CLYDE, this), Ghost(0,0,0,0, DOWN, INKY, this)};
 	Driver* driver;
 	//SMap* solMap;
 	char options[4] = {5, 5, 5, 5};
@@ -325,7 +325,7 @@ public:
 	int count = 0;
 
 	void updateBotPos() {
-		if(driver->status == MOVINGFORWARD) {
+  		if(driver->status == MOVINGFORWARD) {
 			busy = false;
 			// if(countDown) {
 			// 	if(count == 0) {
@@ -339,7 +339,7 @@ public:
 			// }
 			// else
 			 if(!grace && (((driver->rightD->getState() == OPEN && driver->leftD->getState() == OPEN && dir == 2) ||
-				(driver->leftD->getState() == COVERED && driver->rightD->getState() == OPEN && dir == 0) || (driver->leftD->getState() == OPEN && driver->rightD->getState() == COVERED && dir == 1)) || driver->fronts->distance <= 3.2))
+				(driver->leftD->getState() == COVERED && driver->rightD->getState() == OPEN && dir == 0) || (driver->leftD->getState() == OPEN && driver->rightD->getState() == COVERED && dir == 1)) || driver->fronts->distance <= 0.8))
 			{
 				pac->x1 = ploc->x1;
 					pac->x2 = ploc->x2;
@@ -354,7 +354,7 @@ public:
 			}
 			else if(grace) {
 				dis += abs((driver->leftMotor->distance + driver->rightMotor->distance)) * 0.5;
-				if(dis >= 7.5) {
+				if(dis >= 7.8) {
 					grace = false;
 					dis = 0.0;
 				}

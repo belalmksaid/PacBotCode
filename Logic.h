@@ -26,8 +26,8 @@ public:
 		pos = d->leftMotor->encoderPos1;
 		path = new Path();
 		//d->setRight();
-		//d->setCCW();
-		d->setLeft();
+		//d->setCW();
+		//d->setLeft();
 		//d->setStraight();
 
 	}
@@ -36,7 +36,7 @@ public:
 		if(mode == DEAD || driver->coolDown)
 			return;
 		map->update();
-		//assessOptions();
+		assessOptions();
 	}
 
 	void assessOptions() {
@@ -167,7 +167,7 @@ public:
 
 			//F F F F R D
 
-			L F L L R R R R L L 
+			L L L R R R R L L 
 			//R R R F U F R F R L
 			R R F F R L
 			F F L R R

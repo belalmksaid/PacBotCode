@@ -14,7 +14,7 @@
 
 #define FORWARDSPEED 11
 #define BACKSPEED 8
-#define TURNINGSPEED 4.45
+#define TURNINGSPEED 6
 
 #define COOLDOWN() coolDown = true; \
 					t = dt \
@@ -31,8 +31,8 @@
 #define WD 1.5575
 #define STEPS90 BD * PI / 4.0 / (WD * PI) * CSTEPS - 10 + buffer
 #define STEPS90R BD * PI / 4.0 / (WD * PI) * CSTEPS - 10 + buffer
-#define STEPS180 (BD * PI / 4.0 / (WD * PI) * CSTEPS - 5 + 3) * 2.0 - 3
-#define OIN CSTEPS / WD * PI
+#define STEPS180 (BD * PI / 4.0 / (WD * PI) * CSTEPS - 5 + 3) * 2.0 - 3 + buffer
+#define OIN CSTEPS / (WD * PI) * 0.75
 
 
 #define thre 0.32
@@ -74,7 +74,7 @@ public:
 	bool coolDown = false;
 	unsigned long t = 0;
 
-	double ilength = 1.4; // ideal side distance
+	double ilength = 1; // ideal side distance
 	double ispeed = 0.0; // ideal speed
 
 	Driver(Motor* left, Motor* right, Sensor* a, Sensor* b, Sensor* c, Sensor* dd, Sensor* rd, Sensor* ld) {
@@ -92,9 +92,9 @@ public:
 		pidturnR =  new PID(&dummyRight, &rightMasterPWM, &desiredSpeed, .01, 25, .05, DIRECT);
 		walld = new PID(&rights->distance, &distanceAdjust, &lefts->distance, .7, 0.00001, 1, DIRECT); //.25,2,.1
 		walls = new PID(&rights->speed, &speedAdjust, &lefts->speed, 1.5, 0.1, 0, DIRECT); //2,0,0.5
-		hlwalld = new PID(&rights->distance, &distanceAdjust, &ilength, .7, .0000, 1.1, DIRECT); //1,0,.2
+		hlwalld = new PID(&rights->distance, &distanceAdjust, &ilength, .3, .0000, .2, DIRECT); //1,0,.2
 		hlwalls = new PID(&rights->speed, &speedAdjust, &ispeed, 2.5, .0, 0.0, DIRECT); //1,0,0
-		hrwalld = new PID(&rights->distance, &distanceAdjust, &ilength, .7, .0000, 1.1, DIRECT); //1,0,.2
+		hrwalld = new PID(&rights->distance, &distanceAdjust, &ilength, 0.3, .0000, 0.2, DIRECT); //1,0,.2
 		hrwalls = new PID(&rights->speed, &speedAdjust, &ispeed, 2.5, .01, 0.0, DIRECT); //1,0,0
 	}
 
@@ -157,9 +157,9 @@ public:
 		if(lefts->distance > 0 && lefts->distance > .75 && lefts->distance < 3) {
 			buffer = -80 * ((lefts->distance - .75) / 3);
 		}
-		// else if(lefts->distance > 0 && lefts->distance < .75)  {
-		// 	buffer = 75 * ((.75 - lefts->distance) / 1.5);
-		// }
+		else if(lefts->distance > 0 && lefts->distance < .75)  {
+			buffer = 75 * ((.75 - lefts->distance) / 1.5);
+		}
 		status = TURNINGRIGHT;
 		desiredSpeed = TURNINGSPEED;
 		fcall = true;
@@ -173,9 +173,9 @@ public:
 		if(rights->distance > 0 && rights->distance > .75 && rights->distance < 3) {
 			buffer = -80 * ((rights->distance - .75) / 3);
 		}
-		// else if(rights->distance > 0 && rights->distance < .75)  {
-		// 	buffer = 75 * ((.75 - rights->distance) / 1.5);
-		// }
+		else if(rights->distance > 0 && rights->distance < .75)  {
+			buffer = 75 * ((.75 - rights->distance) / 1.5);
+		}
 		// Serial.println(buffer);
 		// Serial.println(rights->distance);
 		status = TURNINGLEFT;
@@ -208,6 +208,11 @@ public:
 		leftMotor->freeze();
 		rightMotor->freeze();
 		status = SLEEP;
+	}
+
+	void sfreeze() {
+		leftMotor->freeze();
+		rightMotor->freeze();
 	}
 
 	void updateEncodersOnly(unsigned long d) {
@@ -273,24 +278,7 @@ private:
 	long p = 0;
 	bool a = false;
 
-	// #define stuck if(abs(p - epos) <= 2 && turncount < 10) turncount++
-						// else { \
-						// 	turncount = 0; \
-						// } \
-						// if(turncount >= 10) { \
-						// 	turncount--; \
-						// 	if(turncount == 10) \
-						// 		a = !a; \
-						// 	if(a) \
-						// 		moveForward(); \
-						// 	else \
-						// 		moveBack(); \
-						// 	return; \
-						// } \
-
 	void turnRight() {
-		if(lefts->distance > 0.0)
-		Serial.println(10 * (lefts->distance / 1.3));
 		if(fcall) {
 			stop();
 			fcall = false;
@@ -298,24 +286,24 @@ private:
 			startEncLeft = leftMotor->encoderPos1;
 			pidturnR->Reset();
 			pidturnL->Reset();
+			if(fronts->distance <= 0.15) {
+				gb = true;
+			}
+			return;
 		}
+		if(gb) {
+			if(startEncLeft - leftMotor->encoderPos1 >= OIN || startEncRight - rightMotor->encoderPos1 >= OIN) {
+				gb = false;
+				freeze();
+				status = TURNINGRIGHT;
+				fcall = true;
+				buffer = -35;
+			}
+			else {
+				moveBack();
+			}
+		} 
 		else {
-			// if(abs(p - leftMotor->encoderPos1) <= 2 && turncount < 10) 
-			// 	turncount++;
-			// else { 
-			// 	turncount = 0; 
-			// } 
-			// p = leftMotor->encoderPos1;
-			// if(turncount >= 10) { 
-			// 	turncount--; 
-			// 	if(turncount == 10) 
-			// 		a = !a; 
-			// 	if(a) 
-			// 		moveForward(); 
-			// 	else 
-			// 		moveBack(); 
-			// 	return; 
-			// } 
 			if(startEncLeft + STEPS90R <= leftMotor->encoderPos1 && startEncRight - rightMotor->encoderPos1 >= STEPS90R) {
 				freeze();
 				COOLDOWN();
@@ -347,7 +335,6 @@ private:
 	double d = 0;
 	bool gb = false;
 	void turnLeft() {
-
 		if(fcall) {
 			stop();
 			fcall = false;
@@ -355,8 +342,7 @@ private:
 			startEncLeft = leftMotor->encoderPos1;
 			pidturnR->Reset();
 			pidturnL->Reset();
-			if(fronts->distance > 5.3 && fronts->distance < 7) {
-				Serial.println("BackUP");
+			if(fronts->distance <= 0.15) {
 				gb = true;
 			}
 			return;
@@ -365,37 +351,20 @@ private:
 			if(startEncLeft - leftMotor->encoderPos1 >= OIN || startEncRight - rightMotor->encoderPos1 >= OIN) {
 				gb = false;
 				freeze();
+				status = TURNINGLEFT;
 				fcall = true;
+				buffer = -53;
 			}
 			else {
 				moveBack();
 			}
-		}
-		// if(abs(p - leftMotor->encoderPos1) <= 1 && turncount < 10) 
-		// 		turncount++;
-		// 	else { 
-		// 		turncount = 0; 
-		// 	} 
-		// 	p = leftMotor->encoderPos1;
-		// 	if(turncount >= 10) { 
-		// 		turncount--; 
-		// 		if(turncount == 10) 
-		// 			a = !a; 
-		// 		if(a) 
-		// 			moveForward(); 
-		// 		else 
-		// 			moveBack(); 
-		// 		return; 
-		// 	} 
+		} 
 		else {
-			// /Serial.println(abs(leftMotor->distance) <= 0.0001);
-			// /stuck();
 			if(startEncLeft - leftMotor->encoderPos1 >= STEPS90 && startEncRight + STEPS90 <= rightMotor->encoderPos1) {
 				freeze();
 				COOLDOWN();
 				return;
 			}
-
 			if(startEncLeft - leftMotor->encoderPos1 >= STEPS90) {
 				leftMotor->freeze();
 			}
@@ -417,9 +386,7 @@ private:
 				pidturnR->Compute();
 			}
 		}
-
 	}
-
 
 	void turnAroundCW() {
 		if(fcall) {
@@ -429,7 +396,23 @@ private:
 			startEncLeft = leftMotor->encoderPos1;
 			pidturnR->Reset();
 			pidturnL->Reset();
+			if(fronts->distance <= 0.15) {
+				gb = true;
+			}
+			return;
 		}
+		if(gb) {
+			if(startEncLeft - leftMotor->encoderPos1 >= OIN || startEncRight - rightMotor->encoderPos1 >= OIN) {
+				gb = false;
+				freeze();
+				status = TURNINGBACKCW;
+				fcall = true;
+				buffer = -5;
+			}
+			else {
+				moveBack();
+			}
+		} 
 		else {
 			if(startEncLeft + STEPS180 <= leftMotor->encoderPos1 && startEncRight - rightMotor->encoderPos1 >= STEPS180) {
 				freeze();
@@ -468,6 +451,22 @@ private:
 			startEncLeft = leftMotor->encoderPos1;
 			pidturnR->Reset();
 			pidturnL->Reset();
+			if(fronts->distance <= 0.15) {
+				gb = true;
+			}
+			return;
+		}
+		if(gb) {
+			if(startEncLeft - leftMotor->encoderPos1 >= OIN || startEncRight - rightMotor->encoderPos1 >= OIN) {
+				gb = false;
+				freeze();
+				status = TURNINGBACKCCW;
+				fcall = true;
+				buffer = -30;
+			}
+			else {
+				moveBack();
+			}
 		}
 		else {
 			if(startEncLeft - leftMotor->encoderPos1 >= STEPS180 && startEncRight + STEPS180 <= rightMotor->encoderPos1) {
@@ -541,7 +540,13 @@ private:
 
 	}
 
+	int cd = 40;
+
 	void moveForward() {
+		if(fcall) {
+			fcall = false;
+			cd = 40;
+		}
 		leftMotor->setDirection(ANTICLOCKWISE);
 		rightMotor->setDirection(CLOCKWISE);
 		leftMotor->setValue((int)leftPWM);
@@ -557,6 +562,12 @@ private:
 		// Serial.print("\t");
 		// Serial.print(rightMotor->speed);
 		// Serial.println("\t");
+		if(cd <= 0 && (leftMotor->speed < 0.2 || rightMotor->speed < 0.2)) {
+			//Serial.println("Stuck");
+		}
+		else if(cd > 0) {
+			cd--;
+		}
 		// Serial.print(lefts->distance);
 		// Serial.print("\t");
 		// Serial.print(rights->distance);
@@ -582,10 +593,6 @@ private:
 			return;
 		}
 		 if(abs((abs(lefts->distance + rights->distance)) - 3.0) <= 1 && abs(lefts->distance) < 4 && abs(rights->distance) < 4) {//(rightD->getState() == COVERED && leftD->getState() == COVERED && ((lefts->distance >= 0 && rights->distance >= 0 && (lefts->distance <= 3 && rights->distance <= 3)))) {//(lefts->distance >= 0 && rights->distance >= 0 && (lefts->distance <= 3 && rights->distance <= 3)) {
-			hlwalls->Reset();
-			hlwalls->Reset();
-			hrwalls->Reset();
-			hrwalls->Reset();
 			walld->Compute();	
 			//walls->Compute();
 			dummyLeft += ((distanceAdjust + speedAdjust) > thre ? (distanceAdjust + speedAdjust) - thre : (distanceAdjust + speedAdjust) < -thre ? (distanceAdjust + speedAdjust) + thre : 0) / 3.0;
@@ -598,23 +605,22 @@ private:
 		else {
 			walls->Reset();
 			walld->Reset();
-			hlwalls->Reset();
-			hlwalls->Reset();
-			hrwalls->Reset();
-			hrwalls->Reset();
-			// if(lefts->distance == 0.0 && rights->distance > 0) {
-			// 	hrwalls->Compute();
+			// if(lefts->distance == 0.0 && rights->distance > -0.3) {
+			// 	//hrwalls->Compute();
 			// 	hrwalld->Compute();
 			// 	hlwalld->Reset();
 			// 	//hlwalls->Reset();
 			// 	dummyLeft +=((distanceAdjust + speedAdjust) > thre ? (distanceAdjust + speedAdjust) - thre : (distanceAdjust + speedAdjust) < -thre ? (distanceAdjust + speedAdjust) + thre : 0) / 3.0;
 			// }
-			// else if(rights->distance == 0.0 && lefts->distance > 0) {
+			// else if(rights->distance == 0.0 && lefts->distance > -0.3) {
 			// 	hrwalld->Reset();
-			// 	hrwalls->Reset();
 			// 	//hlwalls->Compute();
 			// 	hlwalld->Compute();
 			// 	dummyLeft -=((distanceAdjust + speedAdjust) > thre ? (distanceAdjust + speedAdjust) - thre : (distanceAdjust + speedAdjust) < -thre ? (distanceAdjust + speedAdjust) + thre : 0) / 3.0;
+			// }
+			// else {
+			// 	hrwalld->Reset();
+			// 	hlwalld->Reset();
 			// }
 		}		
 	}
