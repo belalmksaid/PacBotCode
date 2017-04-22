@@ -27,16 +27,16 @@ public:
 		path = new Path();
 		//d->setRight();
 		//d->setCCW();
-		//d->setLeft();
+		d->setLeft();
 		//d->setStraight();
 
 	}
 
 	void update() {
-		if(mode == DEAD)
+		if(mode == DEAD || driver->coolDown)
 			return;
 		map->update();
-		assessOptions();
+		//assessOptions();
 	}
 
 	void assessOptions() {
@@ -172,7 +172,7 @@ public:
 			R R F F R L
 			F F L R R
 			R L R R F F F R L F
-			D 
+			D 	
 			mode = SCATTER;
 		}
 		else if(mode == CAUTIOUS) {

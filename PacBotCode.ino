@@ -62,7 +62,7 @@ void setup() {
   gMap.init(14, 14, 23, 24, UP);
   randomSeed(analogRead(A0));
   xbee.begin(9600);
-  //while(!Serial) { }
+  while(!Serial) { }
   //testing();
 }
 

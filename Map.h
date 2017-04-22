@@ -339,7 +339,7 @@ public:
 			// }
 			// else
 			 if(!grace && (((driver->rightD->getState() == OPEN && driver->leftD->getState() == OPEN && dir == 2) ||
-				(driver->leftD->getState() == COVERED && driver->rightD->getState() == OPEN && dir == 0) || (driver->leftD->getState() == OPEN && driver->rightD->getState() == COVERED && dir == 1)) || driver->fronts->distance <= 3))
+				(driver->leftD->getState() == COVERED && driver->rightD->getState() == OPEN && dir == 0) || (driver->leftD->getState() == OPEN && driver->rightD->getState() == COVERED && dir == 1)) || driver->fronts->distance <= 3.2))
 			{
 				pac->x1 = ploc->x1;
 					pac->x2 = ploc->x2;
@@ -354,7 +354,7 @@ public:
 			}
 			else if(grace) {
 				dis += abs((driver->leftMotor->distance + driver->rightMotor->distance)) * 0.5;
-				if(dis >= 7.3) {
+				if(dis >= 7.5) {
 					grace = false;
 					dis = 0.0;
 				}

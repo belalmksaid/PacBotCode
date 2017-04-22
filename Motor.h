@@ -33,6 +33,8 @@ public:
 		direction = d;
 	}
 
+	int nn = 0;
+
 	void updateEncoder(unsigned long nframe) {
 		if(enc->read() != encoderPos1) {
 			encoderPos0 = encoderPos1;
@@ -41,6 +43,13 @@ public:
 			speed = distance / ((nframe - lastTime) / 1000000.0);
 			lastTime = nframe;
 			//Serial.println(speed);
+			nn = 0;
+		}
+		else {
+			nn++;
+			if(nn > 3) {
+				speed = distance = 0;
+			}
 		}
 	}
 
